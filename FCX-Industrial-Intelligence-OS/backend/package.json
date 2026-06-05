@@ -1,0 +1,51 @@
+{
+  "name": "fcx-industrial-backend",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "start:prod": "node dist/main.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "prisma migrate reset --force",
+    "security:jwt": "node scripts/generate-jwt.js",
+    "mqtt:simulator": "node scripts/mqtt-simulator.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "latest",
+    "@nestjs/core": "latest",
+    "@nestjs/platform-express": "latest",
+    "@nestjs/config": "latest",
+    "@nestjs/jwt": "latest",
+    "@nestjs/passport": "latest",
+    "@nestjs/schedule": "latest",
+    "@prisma/client": "latest",
+    "bcrypt": "latest",
+    "class-validator": "latest",
+    "class-transformer": "latest",
+    "compression": "latest",
+    "axios": "latest",
+    "helmet": "latest",
+    "mqtt": "latest",
+    "modbus-serial": "latest",
+    "ioredis": "latest",
+    "prisma": "latest",
+    "rxjs": "latest",
+    "reflect-metadata": "latest"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "latest",
+    "@nestjs/schematics": "latest",
+    "@nestjs/testing": "latest",
+    "@types/compression": "latest",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "typescript": "latest"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

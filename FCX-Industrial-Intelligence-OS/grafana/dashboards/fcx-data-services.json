@@ -1,0 +1,62 @@
+{
+  "id": null,
+  "uid": "fcx-data-services",
+  "title": "FCX Data Services - PostgreSQL Redis MQTT",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "tags": ["fcx", "postgres", "redis", "mqtt"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "PostgreSQL Up",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "pg_up", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "stat",
+      "title": "Redis Up",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "redis_up", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "stat",
+      "title": "MQTT Metrics Up",
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "up{job=\"emqx\"}", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "stat",
+      "title": "Postgres Connections",
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+      "targets": [{"expr": "sum(pg_stat_activity_count)", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis Memory",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "redis_memory_used_bytes", "legendFormat": "used", "refId": "A"}, {"expr": "redis_memory_max_bytes", "legendFormat": "max", "refId": "B"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []}
+    },
+    {
+      "type": "timeseries",
+      "title": "Postgres Tuples",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "sum by(datname) (rate(pg_stat_database_tup_inserted[5m]))", "legendFormat": "insert {{datname}}", "refId": "A"}, {"expr": "sum by(datname) (rate(pg_stat_database_tup_fetched[5m]))", "legendFormat": "fetch {{datname}}", "refId": "B"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "timeseries",
+      "title": "MQTT Clients and Messages",
+      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+      "targets": [{"expr": "{__name__=~\"emqx_.+\"}", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    }
+  ]
+}

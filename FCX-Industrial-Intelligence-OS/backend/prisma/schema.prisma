@@ -1,0 +1,209 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AssetType {
+  COMPRESSOR
+  RACK
+  COLD_ROOM
+  EVAPORATOR
+  CONDENSER
+  PANEL
+  SENSOR
+  PUMP
+  FAN
+  OTHER
+}
+
+enum AssetCriticality {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AssetStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ALARM
+}
+
+enum AlarmSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AlarmStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum WorkOrderPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum WorkOrderStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_PARTS
+  CLOSED
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  ENGINEER
+  TECHNICIAN
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Asset {
+  id           String           @id @default(uuid())
+  nome         String
+  tipo         AssetType
+  fabricante   String?
+  modelo       String?
+  unidade      String
+  criticidade  AssetCriticality @default(MEDIUM)
+  status       AssetStatus      @default(ONLINE)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  telemetry    Telemetry[]
+  telemetryRaw TelemetryRaw[]
+  telemetryProcessed TelemetryProcessed[]
+  alarms       Alarm[]
+  alarmEvents  AlarmEvent[]
+  workOrders   WorkOrder[]
+
+  @@map("assets")
+}
+
+model TelemetryRaw {
+  id          String   @id @default(uuid())
+  assetId     String?  @map("asset_id")
+  asset       Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  source      String
+  protocol    String
+  topic       String?
+  payload     Json
+  receivedAt  DateTime @default(now()) @map("received_at")
+
+  @@index([assetId, receivedAt])
+  @@index([source, protocol, receivedAt])
+  @@map("telemetry_raw")
+}
+
+model TelemetryProcessed {
+  id              String   @id @default(uuid())
+  rawId           String?  @map("raw_id")
+  assetId         String   @map("asset_id")
+  asset           Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  source          String
+  timestamp       DateTime @default(now())
+  temperatura     Float?
+  vibracao        Float?
+  corrente        Float?
+  tensao          Float?
+  potencia        Float?
+  pressao         Float?
+  pressaoSuccao   Float?   @map("pressao_succao")
+  pressaoDescarga Float?   @map("pressao_descarga")
+  umidade         Float?
+  quality         String   @default("GOOD")
+
+  @@index([assetId, timestamp])
+  @@index([source, timestamp])
+  @@map("telemetry_processed")
+}
+
+model AlarmEvent {
+  id          String   @id @default(uuid())
+  assetId     String   @map("asset_id")
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  source      String
+  severidade  String
+  titulo      String
+  descricao   String?
+  metric      String?
+  value       Float?
+  threshold   Float?
+  timestamp   DateTime @default(now())
+  status      String   @default("ACTIVE")
+
+  @@index([assetId, status, timestamp])
+  @@index([source, timestamp])
+  @@map("alarm_events")
+}
+
+model Telemetry {
+  id               String   @id @default(uuid())
+  assetId          String   @map("asset_id")
+  asset            Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  timestamp        DateTime @default(now())
+  temperatura      Float
+  vibracao         Float
+  corrente         Float
+  tensao           Float
+  potencia         Float
+  pressaoSuccao    Float    @map("pressao_succao")
+  pressaoDescarga  Float    @map("pressao_descarga")
+
+  @@index([assetId, timestamp])
+  @@map("telemetry")
+}
+
+model Alarm {
+  id          String        @id @default(uuid())
+  assetId     String        @map("asset_id")
+  asset       Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  severidade  AlarmSeverity
+  titulo      String
+  descricao   String?
+  timestamp   DateTime      @default(now())
+  status      AlarmStatus   @default(ACTIVE)
+
+  @@index([assetId, status, timestamp])
+  @@map("alarms")
+}
+
+model WorkOrder {
+  id             String            @id @default(uuid())
+  numeroOs       String            @unique @map("numero_os")
+  assetId        String            @map("asset_id")
+  ativo          Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tecnico        String
+  prioridade     WorkOrderPriority @default(MEDIUM)
+  status         WorkOrderStatus   @default(OPEN)
+  descricao      String
+  dataAbertura   DateTime          @default(now()) @map("data_abertura")
+  dataFechamento DateTime?         @map("data_fechamento")
+
+  @@index([assetId, status, dataAbertura])
+  @@map("work_orders")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  nome      String
+  email     String     @unique
+  role      UserRole   @default(VIEWER)
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@map("users")
+}
