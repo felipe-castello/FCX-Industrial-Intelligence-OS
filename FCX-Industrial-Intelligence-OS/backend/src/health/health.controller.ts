@@ -1,13 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
+import { HealthService } from './health.service';
 
-@Controller('health')
+@Controller(['health', 'api/health'])
 export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+
   @Get()
   check() {
-    return {
-      status: 'ok',
-      service: 'FCX Industrial Intelligence OS API',
-      timestamp: new Date().toISOString(),
-    };
+    return this.healthService.check();
   }
 }

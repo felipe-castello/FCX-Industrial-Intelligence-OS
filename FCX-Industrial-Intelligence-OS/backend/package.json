@@ -6,6 +6,8 @@
     "start:dev": "nest start --watch",
     "build": "nest build",
     "start:prod": "node dist/main.js",
+    "test": "node tests/predeploy.test.js",
+    "lint": "node scripts/lint-basic.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",

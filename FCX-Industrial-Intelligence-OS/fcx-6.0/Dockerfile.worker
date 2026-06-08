@@ -1,0 +1,16 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV FCX_ENV=production
+ENV FCX_MODE=modular
+
+COPY packages ./packages
+COPY apps ./apps
+COPY modules ./modules
+COPY .env.example ./.env.example
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 CMD node -e "require('./packages/fcx-langchain-adapter/src').createPipeline({ pipeline: 'healthcheck' }); process.exit(0)"
+
+CMD ["node", "-e", "console.log('FCX 6.0 workers ready in modular safe mode'); setInterval(() => {}, 60000)"]

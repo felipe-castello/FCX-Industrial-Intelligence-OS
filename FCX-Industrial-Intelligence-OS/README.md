@@ -33,6 +33,20 @@ A arquitetura completa de integracoes esta documentada em:
 - `docs/GO-LIVE-REVIEW.md`
 - `docs/OBSERVABILIDADE-SRE.md`
 
+## FCX 6.0 Modular Intelligence
+
+O FCX 6.0 adiciona modulos externos independentes em `fcx-6.0/modules`, sem misturar codigo no core principal:
+
+- `agent-skills`
+- `librechat`
+- `langchain`
+- `nango`
+- `quantdinger`
+- `understand-anything`
+- `trading-agents`
+
+A camada FCX fica em `fcx-6.0/apps` e `fcx-6.0/packages`, com adapters carregados por feature flags. Documentacao: `docs/FCX_6_MODULES_INTEGRATION.md`.
+
 ## Deploy em VPS Hostinger
 
 Arquivos de producao:
@@ -78,6 +92,46 @@ Observabilidade:
 ```bash
 ./scripts/test-whatsapp-alert.sh
 ```
+
+## Deploy em VPS — FCX 6.0
+
+Deploy alvo:
+
+- App: https://app.nexusiotenergy.com.br
+- API: https://api.nexusiotenergy.com.br
+- Grafana: https://grafana.nexusiotenergy.com.br
+
+Arquivos principais:
+
+- `docker-compose.prod.yml`
+- `.env.production.example`
+- `backend/Dockerfile.prod`
+- `frontend/Dockerfile.prod`
+- `fcx-6.0/Dockerfile.worker`
+- `deployment/nginx/nginx.conf`
+- `scripts/deploy.sh`
+- `scripts/backup-db.sh`
+- `scripts/restore-db.sh`
+- `scripts/healthcheck.sh`
+- `docs/DEPLOY_VPS_FCX_6.md`
+
+Comandos:
+
+```bash
+cp .env.production.example .env.production
+chmod +x scripts/*.sh backend/docker-entrypoint.prod.sh
+nano .env.production
+./scripts/deploy.sh
+./scripts/healthcheck.sh
+```
+
+Healthcheck:
+
+```text
+GET https://api.nexusiotenergy.com.br/api/health
+```
+
+Feature flags FCX 6.0 ficam desligadas por padrao para modulos externos, exceto `ENABLE_LANGCHAIN=true`. QuantDinger permanece restrito a `research` e `simulation`, sem execucao de ordens financeiras reais.
 
 Dashboards operacionais ficam no Grafana em `FCX Operations`.
 

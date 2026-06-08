@@ -4,6 +4,8 @@ type IncomingRequest = {
   method?: string;
   path?: string;
   originalUrl?: string;
+  ip?: string;
+  socket?: { remoteAddress?: string };
   headers?: Record<string, string | string[] | undefined>;
 };
 
@@ -20,6 +22,29 @@ const safeEqual = (left: string, right: string) => {
   const rightBuffer = Buffer.from(right);
 
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+};
+
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+const enforceRateLimit = (request: IncomingRequest, response: OutgoingResponse) => {
+  const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000);
+  const maxRequests = Number(process.env.RATE_LIMIT_MAX || 600);
+  const now = Date.now();
+  const clientId = readHeader(request.headers, 'x-forwarded-for') || request.ip || request.socket?.remoteAddress || 'unknown';
+  const current = rateLimitStore.get(clientId);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitStore.set(clientId, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (current.count >= maxRequests) {
+    response.status(429).json({ error: 'Rate limit exceeded.' });
+    return false;
+  }
+
+  current.count += 1;
+  return true;
 };
 
 const verifyJwtHs256 = (token: string, secret: string) => {
@@ -62,7 +87,7 @@ const isProtectedRequest = (request: IncomingRequest) => {
   const method = (request.method || 'GET').toUpperCase();
   const path = request.path || request.originalUrl || '/';
 
-  if (path === '/health') {
+  if (path === '/health' || path === '/api/health') {
     return false;
   }
 
@@ -84,6 +109,10 @@ const readHeader = (headers: IncomingRequest['headers'], name: string) => {
 
 export const securityMiddleware = (request: IncomingRequest, response: OutgoingResponse, next: NextFunction) => {
   const authEnabled = (process.env.SECURITY_AUTH_ENABLED || (process.env.NODE_ENV === 'production' ? 'true' : 'false')) !== 'false';
+
+  if (!enforceRateLimit(request, response)) {
+    return;
+  }
 
   if (!authEnabled || !isProtectedRequest(request)) {
     next();

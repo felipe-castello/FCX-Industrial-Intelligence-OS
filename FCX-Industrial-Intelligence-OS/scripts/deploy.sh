@@ -4,7 +4,7 @@ set -eu
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
-COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.production.yml}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 ENV_FILE="${ENV_FILE:-.env.production}"
 
 echo "FCX production deploy - Ubuntu VPS"
@@ -50,3 +50,4 @@ fi
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
+sh scripts/healthcheck.sh
