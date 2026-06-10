@@ -6,8 +6,9 @@ import { CreateAssetDto, UpdateAssetDto } from './dto/asset-management.dto';
 export class AssetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(companyId?: string) {
     const assets = await this.prisma.asset.findMany({
+      where: companyId ? { companyId } : undefined,
       orderBy: { createdAt: 'desc' },
       include: {
         site: true,
@@ -41,7 +42,7 @@ export class AssetsService {
     const site = await this.prisma.site.findUnique({ where: { id: data.siteId } });
     if (!site) throw new NotFoundException('Site not found');
     const asset = await this.prisma.asset.create({
-      data: { ...this.toDatabase(data), unidade: site.name } as never,
+      data: { ...this.toDatabase(data), companyId: site.companyId, unidade: site.name } as never,
       include: { site: true },
     });
     return this.toApi(asset);
@@ -53,7 +54,7 @@ export class AssetsService {
     if (data.siteId && !site) throw new NotFoundException('Site not found');
     const asset = await this.prisma.asset.update({
       where: { id },
-      data: { ...this.toDatabase(data), ...(site ? { unidade: site.name } : {}) } as never,
+      data: { ...this.toDatabase(data), ...(site ? { companyId: site.companyId, unidade: site.name } : {}) } as never,
       include: { site: true },
     });
     return this.toApi(asset);

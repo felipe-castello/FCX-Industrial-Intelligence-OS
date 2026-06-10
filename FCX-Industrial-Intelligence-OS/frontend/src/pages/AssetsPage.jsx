@@ -1,6 +1,6 @@
 import { Plus, Save, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { apiRequest, useApiResource } from '../api';
+import { apiRequest, useApiResource, withCompany } from '../api';
 import { DataTable, Kpi, PageHeader, ResourceState } from '../components/Common';
 
 const initialForm = {
@@ -14,11 +14,11 @@ const initialForm = {
   status: 'ONLINE',
 };
 
-export default function AssetsPage() {
-  const assets = useApiResource('/assets', []);
-  const sites = useApiResource('/sites', []);
-  const sensors = useApiResource('/sensors', []);
-  const gateways = useApiResource('/gateways', []);
+export default function AssetsPage({ activeCompanyId }) {
+  const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
+  const sites = useApiResource(withCompany('/sites', activeCompanyId), []);
+  const sensors = useApiResource(withCompany('/sensors', activeCompanyId), []);
+  const gateways = useApiResource(withCompany('/gateways', activeCompanyId), []);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);
@@ -115,7 +115,7 @@ export default function AssetsPage() {
           { key: 'status', label: 'Status', status: true },
         ]}
         rows={rows}
-        emptyMessage="Nenhum ativo cadastrado. Cadastre o primeiro equipamento industrial."
+        emptyMessage="Nenhum dispositivo conectado para esta empresa."
       />
     </>
   );

@@ -1,9 +1,9 @@
 import { Cable, CheckCircle2, Database, RadioTower, Workflow } from 'lucide-react';
-import { useApiResource } from '../api';
+import { useApiResource, withCompany } from '../api';
 import { EmptyState, PageHeader, Panel, ResourceState, StatusPill, WAITING_FOR_DEVICES } from '../components/Common';
 
-export default function IntegrationsPage() {
-  const integrations = useApiResource('/integrations', { connectors: [] });
+export default function IntegrationsPage({ activeCompanyId }) {
+  const integrations = useApiResource(withCompany('/integrations', activeCompanyId), { connectors: [] });
   const acquisition = useApiResource('/acquisition/architecture', { flow: [], tables: [], services: [], connectors: [] });
   const agents = useApiResource('/agents', { data: [], status: 'unknown' });
 

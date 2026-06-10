@@ -6,8 +6,8 @@ export class AlarmsController {
   constructor(private readonly service: AlarmsService) {}
 
   @Get()
-  findAll(@Query('status') status?: string) {
-    return this.service.findAll(status);
+  findAll(@Query('status') status?: string, @Query('companyId') companyId?: string) {
+    return this.service.findAll(status, companyId);
   }
 
   @Get(':id')

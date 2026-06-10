@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class IntegrationsService {
-  findAll() {
+  findAll(companyId?: string) {
     return {
       module: 'integrations',
+      companyId: companyId || null,
       status: 'ready',
       connectors: [
         { id: 'mqtt-emqx', name: 'MQTT EMQX', status: 'configured' },

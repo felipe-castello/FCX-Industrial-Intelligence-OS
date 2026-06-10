@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { IntegrationsService } from './integrations.service';
 import { CarelBossService } from './services/carel-boss.service';
 import { DataIngestionService } from './services/data-ingestion.service';
@@ -20,8 +20,8 @@ export class IntegrationsController {
   ) {}
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('companyId') companyId?: string) {
+    return this.service.findAll(companyId);
   }
 
   @Get('architecture')

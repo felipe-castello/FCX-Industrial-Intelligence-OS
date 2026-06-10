@@ -3,6 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
+export function withCompany(path, companyId) {
+  if (!companyId) return path;
+  return `${path}${path.includes('?') ? '&' : '?'}companyId=${encodeURIComponent(companyId)}`;
+}
+
 export async function apiRequest(path, options = {}) {
   const { allowNotFound = false, fallback, ...fetchOptions } = options;
   const response = await fetch(`${API_URL}${path}`, {

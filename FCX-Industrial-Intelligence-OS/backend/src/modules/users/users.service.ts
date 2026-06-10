@@ -2,14 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { pickAllowed } from '../../security/sanitize';
 
-const USER_FIELDS = ['nome', 'email', 'role', 'status'];
+const USER_FIELDS = ['companyId', 'nome', 'email', 'role', 'status'];
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.user.findMany({ orderBy: { createdAt: 'desc' } });
+  findAll(companyId?: string) {
+    return this.prisma.user.findMany({ where: companyId ? { companyId } : undefined, orderBy: { createdAt: 'desc' } });
   }
 
   async findOne(id: string) {

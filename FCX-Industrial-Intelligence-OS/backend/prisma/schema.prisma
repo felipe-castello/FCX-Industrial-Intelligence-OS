@@ -87,6 +87,8 @@ enum UserStatus {
 
 model Asset {
   id           String           @id @default(uuid())
+  companyId    String?          @map("company_id")
+  company      Company?         @relation(fields: [companyId], references: [id], onDelete: SetNull)
   siteId       String?          @map("site_id")
   site         Site?            @relation(fields: [siteId], references: [id], onDelete: SetNull)
   nome         String
@@ -106,6 +108,7 @@ model Asset {
   workOrders   WorkOrder[]
   sensors      Sensor[]
 
+  @@index([companyId, status])
   @@index([siteId, status])
   @@map("assets")
 }
@@ -120,6 +123,11 @@ model Company {
   status       RegistryStatus @default(ACTIVE)
   createdAt    DateTime       @default(now()) @map("created_at")
   sites        Site[]
+  assets       Asset[]
+  telemetry    Telemetry[]
+  alarms       Alarm[]
+  workOrders   WorkOrder[]
+  users        User[]
 
   @@map("companies")
 }
@@ -231,6 +239,8 @@ model AlarmEvent {
 
 model Telemetry {
   id               String   @id @default(uuid())
+  companyId        String?  @map("company_id")
+  company          Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
   assetId          String   @map("asset_id")
   asset            Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
   timestamp        DateTime @default(now())
@@ -242,12 +252,15 @@ model Telemetry {
   pressaoSuccao    Float    @map("pressao_succao")
   pressaoDescarga  Float    @map("pressao_descarga")
 
+  @@index([companyId, timestamp])
   @@index([assetId, timestamp])
   @@map("telemetry")
 }
 
 model Alarm {
   id          String        @id @default(uuid())
+  companyId   String?       @map("company_id")
+  company     Company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
   assetId     String        @map("asset_id")
   asset       Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
   severidade  AlarmSeverity
@@ -256,12 +269,15 @@ model Alarm {
   timestamp   DateTime      @default(now())
   status      AlarmStatus   @default(ACTIVE)
 
+  @@index([companyId, status, timestamp])
   @@index([assetId, status, timestamp])
   @@map("alarms")
 }
 
 model WorkOrder {
   id             String            @id @default(uuid())
+  companyId      String?           @map("company_id")
+  company        Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
   numeroOs       String            @unique @map("numero_os")
   assetId        String            @map("asset_id")
   ativo          Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
@@ -272,17 +288,21 @@ model WorkOrder {
   dataAbertura   DateTime          @default(now()) @map("data_abertura")
   dataFechamento DateTime?         @map("data_fechamento")
 
+  @@index([companyId, status, dataAbertura])
   @@index([assetId, status, dataAbertura])
   @@map("work_orders")
 }
 
 model User {
   id        String     @id @default(uuid())
+  companyId String?    @map("company_id")
+  company   Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
   nome      String
   email     String     @unique
   role      UserRole   @default(VIEWER)
   status    UserStatus @default(ACTIVE)
   createdAt DateTime   @default(now()) @map("created_at")
 
+  @@index([companyId, status])
   @@map("users")
 }

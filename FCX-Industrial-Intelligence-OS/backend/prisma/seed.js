@@ -13,19 +13,25 @@ async function main() {
   await prisma.telemetry.deleteMany();
   await prisma.asset.deleteMany();
   await prisma.site.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.company.deleteMany();
 
-  const company = await prisma.company.create({
-    data: {
-      id: 'fcx-demo',
-      name: 'FCX Demo',
-      document: '00.000.000/0001-00',
-      contactName: 'Operação FCX',
-      contactEmail: 'operacao@fcx.demo',
+  const companies = [
+    ['1', 'FCX Interno'], ['2', 'Extrabom'], ['3', 'Carone'],
+    ['4', 'Realmar'], ['5', 'Terca Zilli'], ['6', 'Metal Trade'],
+  ];
+  await prisma.company.createMany({
+    data: companies.map(([id, name], index) => ({
+      id,
+      name,
+      document: `00.000.00${index + 1}/0001-00`,
+      contactName: `Operação ${name}`,
+      contactEmail: `operacao@${name.toLowerCase().replaceAll(' ', '-')}.com.br`,
       contactPhone: '+55 11 4000-5000',
       status: 'ACTIVE',
-    },
+    })),
   });
+  const company = await prisma.company.findUniqueOrThrow({ where: { id: '1' } });
 
   const site = await prisma.site.create({
     data: {
@@ -42,6 +48,7 @@ async function main() {
   const asset = await prisma.asset.create({
     data: {
       id: 'mt100',
+      companyId: company.id,
       siteId: site.id,
       nome: 'Rack MT100',
       tipo: 'RACK',
@@ -93,6 +100,7 @@ async function main() {
 
   const telemetry = {
     assetId: asset.id,
+    companyId: company.id,
     temperatura: 32.4,
     vibracao: 1.82,
     corrente: 38.6,
@@ -135,7 +143,7 @@ async function main() {
     },
   });
 
-  console.log('Seed concluído: FCX Demo, Loja MT100 Lab, Rack MT100, 2 sensores, gateway MQTT e zero alarmes.');
+  console.log('Seed concluído: 6 empresas, FCX Interno com Rack MT100 e zero alarmes falsos.');
 }
 
 main()

@@ -1,6 +1,7 @@
 import {
   Activity,
   BrainCircuit,
+  Building2,
   Boxes,
   ClipboardList,
   Gauge,
@@ -13,10 +14,11 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { API_URL, useApiResource } from '../api';
+import { API_URL, useApiResource, withCompany } from '../api';
 
 const navigation = [
   { path: '/dashboard', label: 'Visão executiva', icon: LayoutDashboard },
+  { path: '/companies', label: 'Empresas', icon: Building2 },
   { path: '/assets', label: 'Ativos', icon: Boxes },
   { path: '/telemetry', label: 'Telemetria', icon: RadioTower },
   { path: '/alarms', label: 'Alarmes', icon: TriangleAlert },
@@ -25,9 +27,9 @@ const navigation = [
   { path: '/integrations', label: 'Integrações', icon: ServerCog },
 ];
 
-export default function Layout({ route, navigate, health, checkHealth, children }) {
+export default function Layout({ route, navigate, health, checkHealth, companies, activeCompanyId, setActiveCompanyId, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const assets = useApiResource('/assets', []);
+  const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
   const online = health.status === 'ok';
   const connectedDevices = Array.isArray(assets.data) ? assets.data.length : 0;
 
@@ -59,7 +61,7 @@ export default function Layout({ route, navigate, health, checkHealth, children 
       <div className="workspace">
         <header className="topbar">
           <button className="iconButton mobileOnly" onClick={() => setMenuOpen(true)} title="Abrir menu"><Menu size={20} /></button>
-          <div className="topbarTitle"><span>Centro de operações</span><strong>Monitoramento em tempo real</strong></div>
+          <label className="companySelector"><span>Empresa ativa</span><select value={activeCompanyId} onChange={(event) => setActiveCompanyId(event.target.value)}>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></label>
           <div className="statusBadges">
             <button className={`connectionStatus ${online ? 'online' : health.status}`} onClick={checkHealth}>
               <span className="statusDot" />
@@ -74,7 +76,7 @@ export default function Layout({ route, navigate, health, checkHealth, children 
             A API está indisponível no momento. A interface continua acessível, mas os dados podem estar desatualizados.
           </div>
         ) : null}
-        {online && connectedDevices === 0 ? <div className="platformBanner">Plataforma operacional - aguardando dispositivos</div> : null}
+        {online && connectedDevices === 0 ? <div className="platformBanner">Nenhum dispositivo conectado para esta empresa.</div> : null}
         <main className="content">{children}</main>
       </div>
     </div>

@@ -6,13 +6,13 @@ export class TelemetryController {
   constructor(private readonly service: TelemetryService) {}
 
   @Get()
-  findAll(@Query('assetId') assetId?: string, @Query('limit') limit?: string) {
-    return this.service.findAll(assetId, limit ? Number(limit) : undefined);
+  findAll(@Query('assetId') assetId?: string, @Query('limit') limit?: string, @Query('companyId') companyId?: string) {
+    return this.service.findAll(assetId, limit ? Number(limit) : undefined, companyId);
   }
 
   @Get('latest')
-  latest() {
-    return this.service.latest();
+  latest(@Query('companyId') companyId?: string) {
+    return this.service.latest(companyId);
   }
 
   @Get(':id')

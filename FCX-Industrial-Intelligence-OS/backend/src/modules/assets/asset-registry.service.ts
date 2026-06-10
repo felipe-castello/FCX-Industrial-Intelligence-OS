@@ -5,30 +5,8 @@ import { PrismaService } from '../../database/prisma.service';
 export class AssetRegistryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  companies() {
-    return this.prisma.company.findMany({ orderBy: { createdAt: 'desc' }, include: { _count: { select: { sites: true } } } });
-  }
-
-  company(id: string) {
-    return this.findOrThrow(this.prisma.company.findUnique({ where: { id }, include: { sites: true } }), 'Company');
-  }
-
-  createCompany(data: object) {
-    return this.prisma.company.create({ data: data as never });
-  }
-
-  async updateCompany(id: string, data: object) {
-    await this.company(id);
-    return this.prisma.company.update({ where: { id }, data: data as never });
-  }
-
-  async removeCompany(id: string) {
-    await this.company(id);
-    return this.prisma.company.delete({ where: { id } });
-  }
-
-  sites() {
-    return this.prisma.site.findMany({ orderBy: { createdAt: 'desc' }, include: { company: true, _count: { select: { assets: true, gateways: true } } } });
+  sites(companyId?: string) {
+    return this.prisma.site.findMany({ where: companyId ? { companyId } : undefined, orderBy: { createdAt: 'desc' }, include: { company: true, _count: { select: { assets: true, gateways: true } } } });
   }
 
   site(id: string) {
@@ -49,8 +27,8 @@ export class AssetRegistryService {
     return this.prisma.site.delete({ where: { id } });
   }
 
-  sensors() {
-    return this.prisma.sensor.findMany({ orderBy: { createdAt: 'desc' }, include: { asset: true } });
+  sensors(companyId?: string) {
+    return this.prisma.sensor.findMany({ where: companyId ? { asset: { companyId } } : undefined, orderBy: { createdAt: 'desc' }, include: { asset: true } });
   }
 
   sensor(id: string) {
@@ -71,8 +49,8 @@ export class AssetRegistryService {
     return this.prisma.sensor.delete({ where: { id } });
   }
 
-  gateways() {
-    return this.prisma.gateway.findMany({ orderBy: { createdAt: 'desc' }, include: { site: true } });
+  gateways(companyId?: string) {
+    return this.prisma.gateway.findMany({ where: companyId ? { site: { companyId } } : undefined, orderBy: { createdAt: 'desc' }, include: { site: true } });
   }
 
   gateway(id: string) {

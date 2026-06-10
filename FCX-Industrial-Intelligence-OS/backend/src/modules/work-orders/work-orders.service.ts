@@ -4,6 +4,7 @@ import { pickAllowed } from '../../security/sanitize';
 
 const WORK_ORDER_FIELDS = [
   'numeroOs',
+  'companyId',
   'assetId',
   'tecnico',
   'prioridade',
@@ -17,9 +18,9 @@ const WORK_ORDER_FIELDS = [
 export class WorkOrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(status?: string) {
+  findAll(status?: string, companyId?: string) {
     return this.prisma.workOrder.findMany({
-      where: status ? { status: status as never } : undefined,
+      where: { ...(status ? { status: status as never } : {}), ...(companyId ? { companyId } : {}) },
       include: { ativo: true },
       orderBy: { dataAbertura: 'desc' },
     });
@@ -35,8 +36,10 @@ export class WorkOrdersService {
     return workOrder;
   }
 
-  create(data: Record<string, unknown>) {
-    return this.prisma.workOrder.create({ data: pickAllowed(data, WORK_ORDER_FIELDS) as never });
+  async create(data: Record<string, unknown>) {
+    const asset = await this.prisma.asset.findUnique({ where: { id: String(data.assetId || '') } });
+    const fields = pickAllowed<Record<string, unknown>>(data, WORK_ORDER_FIELDS);
+    return this.prisma.workOrder.create({ data: { ...fields, companyId: data.companyId || asset?.companyId } as never });
   }
 
   async update(id: string, data: Record<string, unknown>) {

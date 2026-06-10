@@ -54,6 +54,9 @@ button { color: inherit; }
 .apiBanner { background: #2b1d17; border-bottom: 1px solid #69402c; color: #ffd0b5; font-size: 12px; padding: 10px 24px; }
 .platformBanner { background: #10251e; border-bottom: 1px solid #285a48; color: #a7eac8; font-size: 12px; padding: 10px 24px; }
 .statusBadges { align-items: center; display: flex; gap: 8px; }
+.companySelector { display: grid; gap: 3px; min-width: 210px; }
+.companySelector span { color: var(--muted); font-size: 9px; text-transform: uppercase; }
+.companySelector select { background: var(--surface-2); border: 1px solid var(--line-bright); border-radius: 5px; color: var(--text); min-height: 32px; padding: 0 8px; }
 .deviceBadge { background: #10252d; border: 1px solid #296173; border-radius: 999px; color: #8eddf0; font-size: 10px; padding: 7px 10px; text-transform: uppercase; white-space: nowrap; }
 .content { background: linear-gradient(180deg, #0a1116 0, var(--bg) 420px); min-height: calc(100vh - 66px); padding: 24px; }
 
@@ -122,6 +125,11 @@ h1 { font-size: 28px; line-height: 1.15; margin-bottom: 6px; }
 .assetForm input, .assetForm select { background: var(--surface-2); border: 1px solid var(--line-bright); border-radius: 4px; color: var(--text); min-height: 38px; outline: none; padding: 0 9px; text-transform: none; }
 .assetForm input:focus, .assetForm select:focus { border-color: var(--cyan); }
 .formSubmit { align-self: end; justify-content: center; }
+.companyGrid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 12px; }
+.companyCard { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--text); cursor: pointer; display: grid; gap: 6px; min-height: 105px; padding: 14px; text-align: left; }
+.companyCard svg { color: var(--cyan); }
+.companyCard span { color: var(--muted); font-size: 11px; }
+.companyCard.active { background: #10251e; border-color: #388163; }
 .searchBox { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--muted); display: flex; gap: 8px; max-width: 390px; padding: 0 10px; width: 100%; }
 .searchBox input { background: transparent; border: 0; color: var(--text); height: 38px; outline: none; width: 100%; }
 .tableWrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; }
@@ -152,6 +160,7 @@ tbody tr:hover { background: #0e181e; }
   .kpiGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .assetSummary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .assetForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .companyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .panelGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipeline { grid-template-columns: repeat(4, 1fr); }
 }
@@ -166,11 +175,13 @@ tbody tr:hover { background: #0e181e; }
   .topbarTitle { display: none; }
   .connectionStatus span:nth-child(2) { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .deviceBadge { display: none; }
+  .companySelector { min-width: 150px; }
   .content { padding: 16px 12px; }
   .pageHeader { align-items: stretch; flex-direction: column; }
   h1 { font-size: 23px; }
   .kpiGrid, .kpiGrid.compact, .panelGrid, .integrationSummary { grid-template-columns: 1fr; }
   .assetSummary, .assetForm { grid-template-columns: 1fr; }
+  .companyGrid { grid-template-columns: 1fr; }
   .panel.wide { grid-column: auto; }
   .pipeline { grid-template-columns: repeat(2, 1fr); }
   .scoreList > div { grid-template-columns: 1fr; }

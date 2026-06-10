@@ -2,15 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { pickAllowed } from '../../security/sanitize';
 
-const ALARM_FIELDS = ['assetId', 'severidade', 'titulo', 'descricao', 'timestamp', 'status'];
+const ALARM_FIELDS = ['assetId', 'companyId', 'severidade', 'titulo', 'descricao', 'timestamp', 'status'];
 
 @Injectable()
 export class AlarmsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(status?: string) {
+  findAll(status?: string, companyId?: string) {
     return this.prisma.alarm.findMany({
-      where: status ? { status: status as never } : undefined,
+      where: { ...(status ? { status: status as never } : {}), ...(companyId ? { companyId } : {}) },
       include: { asset: true },
       orderBy: { timestamp: 'desc' },
     });
@@ -26,8 +26,10 @@ export class AlarmsService {
     return alarm;
   }
 
-  create(data: Record<string, unknown>) {
-    return this.prisma.alarm.create({ data: pickAllowed(data, ALARM_FIELDS) as never });
+  async create(data: Record<string, unknown>) {
+    const asset = await this.prisma.asset.findUnique({ where: { id: String(data.assetId || '') } });
+    const fields = pickAllowed<Record<string, unknown>>(data, ALARM_FIELDS);
+    return this.prisma.alarm.create({ data: { ...fields, companyId: data.companyId || asset?.companyId } as never });
   }
 
   async update(id: string, data: Record<string, unknown>) {

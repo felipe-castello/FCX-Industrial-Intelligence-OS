@@ -13,6 +13,7 @@ import { PredictiveModule } from './modules/predictive/predictive.module';
 import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { CompaniesModule } from './modules/companies/companies.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MetricsModule } from './metrics/metrics.module';
     MetricsModule,
     DatabaseModule,
     AssetsModule,
+    CompaniesModule,
     TelemetryModule,
     AlarmsModule,
     WorkOrdersModule,

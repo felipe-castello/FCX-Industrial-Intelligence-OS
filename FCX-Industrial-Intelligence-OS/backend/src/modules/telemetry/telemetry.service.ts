@@ -5,6 +5,7 @@ import { pickAllowed } from '../../security/sanitize';
 
 const TELEMETRY_FIELDS = [
   'assetId',
+  'companyId',
   'timestamp',
   'temperatura',
   'vibracao',
@@ -19,13 +20,14 @@ const TELEMETRY_FIELDS = [
 export class TelemetryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  latest() {
+  latest(companyId?: string) {
+    if (companyId && companyId !== '1') return null;
     return { ...MT100_LATEST_TELEMETRY, timestamp: new Date().toISOString() };
   }
 
-  findAll(assetId?: string, limit = 100) {
+  findAll(assetId?: string, limit = 100, companyId?: string) {
     return this.prisma.telemetry.findMany({
-      where: assetId ? { assetId } : undefined,
+      where: { ...(assetId ? { assetId } : {}), ...(companyId ? { companyId } : {}) },
       include: { asset: true },
       orderBy: { timestamp: 'desc' },
       take: Math.min(limit, 1000),
@@ -42,8 +44,10 @@ export class TelemetryService {
     return telemetry;
   }
 
-  create(data: Record<string, unknown>) {
-    return this.prisma.telemetry.create({ data: pickAllowed(data, TELEMETRY_FIELDS) as never });
+  async create(data: Record<string, unknown>) {
+    const asset = await this.prisma.asset.findUnique({ where: { id: String(data.assetId || '') } });
+    const fields = pickAllowed<Record<string, unknown>>(data, TELEMETRY_FIELDS);
+    return this.prisma.telemetry.create({ data: { ...fields, companyId: data.companyId || asset?.companyId } as never });
   }
 
   async update(id: string, data: Record<string, unknown>) {

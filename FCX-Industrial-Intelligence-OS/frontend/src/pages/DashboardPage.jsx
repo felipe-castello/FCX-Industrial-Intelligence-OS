@@ -1,12 +1,12 @@
-import { useApiResource } from '../api';
+import { useApiResource, withCompany } from '../api';
 import { EmptyState, Kpi, PageHeader, Panel, ResourceState, Sparkline, StatusPill, WAITING_FOR_DEVICES, formatNumber } from '../components/Common';
 
 const fallback = { kpis: {}, widgets: {} };
 
-export default function DashboardPage() {
-  const resource = useApiResource('/dashboards', fallback);
-  const assets = useApiResource('/assets', []);
-  const alarms = useApiResource('/alarms', []);
+export default function DashboardPage({ activeCompanyId }) {
+  const resource = useApiResource(withCompany('/dashboards', activeCompanyId), fallback);
+  const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
+  const alarms = useApiResource(withCompany('/alarms', activeCompanyId), []);
   const { kpis = {}, widgets = {} } = resource.data;
   const monitoredAssets = Array.isArray(assets.data) ? assets.data.length : 0;
   const activeAlarms = Array.isArray(alarms.data) ? alarms.data.filter((alarm) => alarm.status === 'ACTIVE').length : 0;
