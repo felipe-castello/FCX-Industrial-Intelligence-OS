@@ -1,5 +1,5 @@
 import { useApiResource } from '../api';
-import { EmptyState, Kpi, PageHeader, Panel, ResourceState, Sparkline, StatusPill, formatNumber } from '../components/Common';
+import { EmptyState, Kpi, PageHeader, Panel, ResourceState, Sparkline, StatusPill, WAITING_FOR_DEVICES, formatNumber } from '../components/Common';
 
 const fallback = { kpis: {}, widgets: {} };
 
@@ -21,12 +21,13 @@ export default function DashboardPage() {
         <Kpi label="Consumo médio" value={`${formatNumber(kpis.consumoEnergetico, 1)} kW`} detail="demanda energética" />
         <Kpi label="Ordens abertas" value={kpis.ordensAbertas || 0} detail="fila de manutenção" tone="warning" />
       </section>
+      {!resource.error && !resource.loading && !kpis.ativosMonitorados ? <div className="notice emptyNotice">{WAITING_FOR_DEVICES}</div> : null}
       <section className="panelGrid">
         <Panel title="Saúde dos ativos" subtitle="Distribuição por estado operacional">
           <div className="healthList">{healthRows.length ? healthRows.map((item) => <div key={item.status}><StatusPill value={item.status} /><div className="bar"><i style={{ width: `${(item.total / total) * 100}%` }} /></div><strong>{item.total}</strong></div>) : <EmptyState />}</div>
         </Panel>
         <Panel title="Alarmes críticos" subtitle="Eventos ativos de maior severidade">
-          <div className="eventList">{(widgets.alarmesCriticos || []).length ? widgets.alarmesCriticos.map((item) => <div key={item.id}><strong>{item.titulo}</strong><span>{item.asset?.nome || 'Ativo'} · {item.severidade}</span></div>) : <EmptyState message="Nenhum alarme crítico ativo." />}</div>
+          <div className="eventList">{(widgets.alarmesCriticos || []).length ? widgets.alarmesCriticos.map((item) => <div key={item.id}><strong>{item.titulo}</strong><span>{item.asset?.nome || 'Ativo'} · {item.severidade}</span></div>) : <EmptyState />}</div>
         </Panel>
         <Panel title="Temperatura" subtitle="Tendência recente"><Sparkline data={widgets.tendenciaTemperatura || []} suffix="°C" /></Panel>
         <Panel title="Vibração" subtitle="Tendência recente"><Sparkline data={widgets.tendenciaVibracao || []} suffix="mm/s" /></Panel>

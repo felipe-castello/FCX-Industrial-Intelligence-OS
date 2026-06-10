@@ -1,26 +1,43 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '');
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
 export async function apiRequest(path, options = {}) {
+  const { allowNotFound = false, fallback, ...fetchOptions } = options;
   const response = await fetch(`${API_URL}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       Accept: 'application/json',
       ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   });
+
+  if (allowNotFound && response.status === 404) {
+    return fallback;
+  }
 
   if (!response.ok) {
     throw new Error(`API respondeu com HTTP ${response.status}`);
   }
 
+  if (response.status === 204) {
+    return fallback;
+  }
+
   return response.json();
 }
 
+function normalizeResource(payload, fallback) {
+  if (payload === null || payload === undefined) return fallback;
+  if (Array.isArray(payload) && payload.length === 0) return fallback;
+  if (!Array.isArray(payload) && typeof payload === 'object' && Object.keys(payload).length === 0) return fallback;
+  return payload;
+}
+
 export function useApiResource(path, fallback) {
+  const fallbackRef = useRef(fallback);
   const [data, setData] = useState(fallback);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -29,12 +46,12 @@ export function useApiResource(path, fallback) {
   const refresh = useCallback(async () => {
     try {
       setLoading(true);
-      const payload = await apiRequest(path);
-      setData(payload);
+      const payload = await apiRequest(path, { allowNotFound: true, fallback: fallbackRef.current });
+      setData(normalizeResource(payload, fallbackRef.current));
       setError('');
       setUpdatedAt(new Date());
     } catch (requestError) {
-      setError('Não foi possível carregar os dados. Verifique a conexão com a API.');
+      setError('Dados temporariamente indisponíveis. Tente atualizar novamente.');
     } finally {
       setLoading(false);
     }
@@ -53,7 +70,7 @@ export function useApiHealth() {
   const check = useCallback(async () => {
     try {
       const payload = await apiRequest('/health');
-      setHealth({ ...payload, status: 'ok' });
+      setHealth({ ...payload, status: payload?.status === 'ok' ? 'ok' : 'offline' });
     } catch (error) {
       setHealth({ status: 'offline', service: 'FCX API', timestamp: null });
     }

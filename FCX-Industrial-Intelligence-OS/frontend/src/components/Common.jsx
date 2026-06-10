@@ -40,7 +40,9 @@ export function Panel({ title, subtitle, children, className = '' }) {
   return <article className={`panel ${className}`}><header><div><h2>{title}</h2>{subtitle ? <p>{subtitle}</p> : null}</div></header>{children}</article>;
 }
 
-export function EmptyState({ message = 'Nenhum registro encontrado.' }) {
+export const WAITING_FOR_DEVICES = 'Aguardando conexão dos primeiros dispositivos industriais.';
+
+export function EmptyState({ message = WAITING_FOR_DEVICES }) {
   return <div className="emptyState">{message}</div>;
 }
 
@@ -49,7 +51,7 @@ export function StatusPill({ value }) {
   return <span className={`pill ${status}`}>{formatCell(value)}</span>;
 }
 
-export function DataTable({ columns, rows }) {
+export function DataTable({ columns, rows, emptyMessage = WAITING_FOR_DEVICES }) {
   return (
     <div className="tableWrap">
       <table>
@@ -59,7 +61,7 @@ export function DataTable({ columns, rows }) {
             <tr key={row.id || index}>{columns.map((column) => (
               <td key={column.key}>{column.status ? <StatusPill value={row[column.key]} /> : formatCell(row[column.key])}</td>
             ))}</tr>
-          )) : <tr><td colSpan={columns.length}><EmptyState /></td></tr>}
+          )) : <tr><td colSpan={columns.length}><EmptyState message={emptyMessage} /></td></tr>}
         </tbody>
       </table>
     </div>

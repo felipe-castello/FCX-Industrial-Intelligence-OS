@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { useState } from 'react';
-import { API_URL } from '../api';
+import { API_URL, useApiResource } from '../api';
 
 const navigation = [
   { path: '/dashboard', label: 'Visão executiva', icon: LayoutDashboard },
@@ -27,7 +27,9 @@ const navigation = [
 
 export default function Layout({ route, navigate, health, checkHealth, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const assets = useApiResource('/assets', []);
   const online = health.status === 'ok';
+  const connectedDevices = Array.isArray(assets.data) ? assets.data.length : 0;
 
   function go(path) {
     navigate(path);
@@ -58,17 +60,21 @@ export default function Layout({ route, navigate, health, checkHealth, children 
         <header className="topbar">
           <button className="iconButton mobileOnly" onClick={() => setMenuOpen(true)} title="Abrir menu"><Menu size={20} /></button>
           <div className="topbarTitle"><span>Centro de operações</span><strong>Monitoramento em tempo real</strong></div>
-          <button className={`connectionStatus ${online ? 'online' : health.status}`} onClick={checkHealth}>
-            <span className="statusDot" />
-            <span>{online ? 'API conectada' : health.status === 'checking' ? 'Verificando API' : 'API indisponível'}</span>
-            <RefreshCw size={14} />
-          </button>
+          <div className="statusBadges">
+            <button className={`connectionStatus ${online ? 'online' : health.status}`} onClick={checkHealth}>
+              <span className="statusDot" />
+              <span>{online ? 'API ONLINE' : health.status === 'checking' ? 'Verificando API' : 'API indisponível'}</span>
+              <RefreshCw size={14} />
+            </button>
+            <span className="deviceBadge">{connectedDevices} Dispositivos Conectados</span>
+          </div>
         </header>
         {!online && health.status !== 'checking' ? (
           <div className="apiBanner">
             A API está indisponível no momento. A interface continua acessível, mas os dados podem estar desatualizados.
           </div>
         ) : null}
+        {online && connectedDevices === 0 ? <div className="platformBanner">Plataforma operacional - aguardando dispositivos</div> : null}
         <main className="content">{children}</main>
       </div>
     </div>

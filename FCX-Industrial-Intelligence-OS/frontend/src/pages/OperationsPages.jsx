@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { useApiResource } from '../api';
-import { DataTable, Kpi, PageHeader, ResourceState } from '../components/Common';
+import { DataTable, Kpi, PageHeader, ResourceState, WAITING_FOR_DEVICES } from '../components/Common';
 
 function SearchBar({ value, onChange, placeholder }) {
   return <label className="searchBox"><Search size={16} /><input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} /></label>;
@@ -18,7 +18,7 @@ function OperationalTablePage({ title, subtitle, path, columns, mapRow = (row) =
     <ResourceState resource={resource} />
     <section className="kpiGrid compact">{metrics(rows).map((item) => <Kpi key={item.label} {...item} />)}</section>
     <div className="tableToolbar"><SearchBar value={query} onChange={setQuery} placeholder={`Buscar em ${title.toLowerCase()}...`} /><span>{filtered.length} registros</span></div>
-    <DataTable columns={columns} rows={filtered} />
+    <DataTable columns={columns} rows={filtered} emptyMessage={query ? 'Nenhum registro corresponde à busca.' : WAITING_FOR_DEVICES} />
   </>;
 }
 
