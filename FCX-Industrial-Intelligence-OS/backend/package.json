@@ -16,25 +16,25 @@
   },
   "dependencies": {
     "@nestjs/common": "latest",
-    "@nestjs/core": "latest",
-    "@nestjs/platform-express": "latest",
     "@nestjs/config": "latest",
+    "@nestjs/core": "latest",
     "@nestjs/jwt": "latest",
     "@nestjs/passport": "latest",
+    "@nestjs/platform-express": "latest",
     "@nestjs/schedule": "latest",
-    "@prisma/client": "latest",
-    "bcrypt": "latest",
-    "class-validator": "latest",
-    "class-transformer": "latest",
-    "compression": "latest",
+    "@prisma/client": "^6.19.3",
     "axios": "latest",
+    "bcrypt": "latest",
+    "class-transformer": "latest",
+    "class-validator": "latest",
+    "compression": "latest",
     "helmet": "latest",
-    "mqtt": "latest",
-    "modbus-serial": "latest",
     "ioredis": "latest",
-    "prisma": "latest",
-    "rxjs": "latest",
-    "reflect-metadata": "latest"
+    "modbus-serial": "latest",
+    "mqtt": "latest",
+    "prisma": "^6.19.3",
+    "reflect-metadata": "latest",
+    "rxjs": "latest"
   },
   "devDependencies": {
     "@nestjs/cli": "latest",
@@ -43,7 +43,7 @@
     "@types/compression": "latest",
     "@types/express": "latest",
     "@types/node": "latest",
-    "typescript": "latest"
+    "typescript": "^5.9.3"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

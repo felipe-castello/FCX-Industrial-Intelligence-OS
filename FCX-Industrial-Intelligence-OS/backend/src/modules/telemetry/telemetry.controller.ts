@@ -10,6 +10,11 @@ export class TelemetryController {
     return this.service.findAll(assetId, limit ? Number(limit) : undefined);
   }
 
+  @Get('latest')
+  latest() {
+    return this.service.latest();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);

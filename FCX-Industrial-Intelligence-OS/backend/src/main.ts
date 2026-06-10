@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import compression from 'compression';
 import helmet from 'helmet';
-import { json, urlencoded } from 'express';
+import { json, NextFunction, Request, Response, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { securityMiddleware } from './security/http-security';
 import { MetricsService } from './metrics/metrics.service';
@@ -27,7 +27,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: false, limit: process.env.REQUEST_BODY_LIMIT || '1mb' }));
   app.use(compression());
   const metrics = app.get(MetricsService);
-  app.use((request, response, next) => {
+  app.use((request: Request, response: Response, next: NextFunction) => {
     const startedAt = process.hrtime.bigint();
 
     response.on('finish', () => {

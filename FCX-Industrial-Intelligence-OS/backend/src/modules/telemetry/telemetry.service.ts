@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { MT100_LATEST_TELEMETRY } from '../../demo/mt100.demo';
 import { pickAllowed } from '../../security/sanitize';
 
 const TELEMETRY_FIELDS = [
@@ -17,6 +18,10 @@ const TELEMETRY_FIELDS = [
 @Injectable()
 export class TelemetryService {
   constructor(private readonly prisma: PrismaService) {}
+
+  latest() {
+    return { ...MT100_LATEST_TELEMETRY, timestamp: new Date().toISOString() };
+  }
 
   findAll(assetId?: string, limit = 100) {
     return this.prisma.telemetry.findMany({

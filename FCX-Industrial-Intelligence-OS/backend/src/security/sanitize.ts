@@ -5,5 +5,5 @@ export const pickAllowed = <T extends Record<string, unknown>>(data: Record<stri
     }
 
     return result;
-  }, {} as T);
+  }, {} as Record<string, unknown>) as T;
 };

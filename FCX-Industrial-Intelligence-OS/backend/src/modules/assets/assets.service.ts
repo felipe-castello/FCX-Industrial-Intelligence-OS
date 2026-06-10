@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { MT100_DEMO_ASSET } from '../../demo/mt100.demo';
 import { pickAllowed } from '../../security/sanitize';
 
 const ASSET_FIELDS = ['nome', 'tipo', 'fabricante', 'modelo', 'unidade', 'criticidade', 'status'];
@@ -8,13 +9,27 @@ const ASSET_FIELDS = ['nome', 'tipo', 'fabricante', 'modelo', 'unidade', 'critic
 export class AssetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.asset.findMany({
+  async findAll() {
+    const assets = await this.prisma.asset.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
         _count: { select: { telemetry: true, alarms: true, workOrders: true } },
       },
     });
+
+    if (!assets.length) {
+      return [{ ...MT100_DEMO_ASSET, _count: { telemetry: 1, alarms: 0, workOrders: 0 } }];
+    }
+
+    return assets.map((asset) =>
+      asset.id === MT100_DEMO_ASSET.id
+        ? {
+            ...asset,
+            ...MT100_DEMO_ASSET,
+            _count: asset._count,
+          }
+        : asset,
+    );
   }
 
   async findOne(id: string) {

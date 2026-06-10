@@ -5,7 +5,11 @@ const fallback = { kpis: {}, widgets: {} };
 
 export default function DashboardPage() {
   const resource = useApiResource('/dashboards', fallback);
+  const assets = useApiResource('/assets', []);
+  const alarms = useApiResource('/alarms', []);
   const { kpis = {}, widgets = {} } = resource.data;
+  const monitoredAssets = Array.isArray(assets.data) ? assets.data.length : 0;
+  const activeAlarms = Array.isArray(alarms.data) ? alarms.data.filter((alarm) => alarm.status === 'ACTIVE').length : 0;
   const healthRows = widgets.saudeAtivos || [];
   const total = healthRows.reduce((sum, item) => sum + item.total, 0) || 1;
 
@@ -14,14 +18,14 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard executivo" subtitle="Indicadores críticos para decisão e continuidade operacional." resource={resource} />
       <ResourceState resource={resource} />
       <section className="kpiGrid">
-        <Kpi label="Ativos monitorados" value={kpis.ativosMonitorados || 0} detail="inventário conectado" />
-        <Kpi label="Alarmes ativos" value={kpis.alarmesAtivos || 0} detail="requerem atenção" tone="danger" />
+        <Kpi label="Ativos monitorados" value={monitoredAssets || kpis.ativosMonitorados || 0} detail="inventário conectado" />
+        <Kpi label="Alarmes ativos" value={activeAlarms} detail="requerem atenção" tone="danger" />
         <Kpi label="Temperatura média" value={`${formatNumber(kpis.temperaturaMedia, 1)} °C`} detail="janela operacional" />
         <Kpi label="Vibração média" value={`${formatNumber(kpis.vibracaoMedia, 2)} mm/s`} detail="condição mecânica" />
         <Kpi label="Consumo médio" value={`${formatNumber(kpis.consumoEnergetico, 1)} kW`} detail="demanda energética" />
         <Kpi label="Ordens abertas" value={kpis.ordensAbertas || 0} detail="fila de manutenção" tone="warning" />
       </section>
-      {!resource.error && !resource.loading && !kpis.ativosMonitorados ? <div className="notice emptyNotice">{WAITING_FOR_DEVICES}</div> : null}
+      {!resource.error && !resource.loading && !monitoredAssets && !kpis.ativosMonitorados ? <div className="notice emptyNotice">{WAITING_FOR_DEVICES}</div> : null}
       <section className="panelGrid">
         <Panel title="Saúde dos ativos" subtitle="Distribuição por estado operacional">
           <div className="healthList">{healthRows.length ? healthRows.map((item) => <div key={item.status}><StatusPill value={item.status} /><div className="bar"><i style={{ width: `${(item.total / total) * 100}%` }} /></div><strong>{item.total}</strong></div>) : <EmptyState />}</div>

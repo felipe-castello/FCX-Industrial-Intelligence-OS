@@ -22,7 +22,7 @@ export class ModbusTcpService {
       await client.connectTCP(host, { port });
       client.setID(unitId);
       const registers = await client.readHoldingRegisters(0, 8);
-      const [temperatura, vibracao, corrente, tensao, energia] = registers.data.map((value) => value / 10);
+      const [temperatura, vibracao, corrente, tensao, energia] = registers.data.map((value: number) => value / 10);
 
       return this.ingestion.ingest('modbus-tcp', {
         assetId,
