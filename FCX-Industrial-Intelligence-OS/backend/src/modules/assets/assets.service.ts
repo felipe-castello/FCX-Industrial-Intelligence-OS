@@ -1,9 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { MT100_DEMO_ASSET } from '../../demo/mt100.demo';
-import { pickAllowed } from '../../security/sanitize';
-
-const ASSET_FIELDS = ['nome', 'tipo', 'fabricante', 'modelo', 'unidade', 'criticidade', 'status'];
+import { CreateAssetDto, UpdateAssetDto } from './dto/asset-management.dto';
 
 @Injectable()
 export class AssetsService {
@@ -13,23 +10,12 @@ export class AssetsService {
     const assets = await this.prisma.asset.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: { select: { telemetry: true, alarms: true, workOrders: true } },
+        site: true,
+        _count: { select: { telemetry: true, alarms: true, workOrders: true, sensors: true } },
       },
     });
 
-    if (!assets.length) {
-      return [{ ...MT100_DEMO_ASSET, _count: { telemetry: 1, alarms: 0, workOrders: 0 } }];
-    }
-
-    return assets.map((asset) =>
-      asset.id === MT100_DEMO_ASSET.id
-        ? {
-            ...asset,
-            ...MT100_DEMO_ASSET,
-            _count: asset._count,
-          }
-        : asset,
-    );
+    return assets.map((asset) => this.toApi(asset));
   }
 
   async findOne(id: string) {
@@ -39,6 +25,8 @@ export class AssetsService {
         telemetry: { orderBy: { timestamp: 'desc' }, take: 20 },
         alarms: { orderBy: { timestamp: 'desc' }, take: 20 },
         workOrders: { orderBy: { dataAbertura: 'desc' }, take: 20 },
+        site: true,
+        sensors: true,
       },
     });
 
@@ -46,20 +34,58 @@ export class AssetsService {
       throw new NotFoundException('Asset not found');
     }
 
-    return asset;
+    return this.toApi(asset);
   }
 
-  create(data: Record<string, unknown>) {
-    return this.prisma.asset.create({ data: pickAllowed(data, ASSET_FIELDS) as never });
+  async create(data: CreateAssetDto) {
+    const site = await this.prisma.site.findUnique({ where: { id: data.siteId } });
+    if (!site) throw new NotFoundException('Site not found');
+    const asset = await this.prisma.asset.create({
+      data: { ...this.toDatabase(data), unidade: site.name } as never,
+      include: { site: true },
+    });
+    return this.toApi(asset);
   }
 
-  async update(id: string, data: Record<string, unknown>) {
+  async update(id: string, data: UpdateAssetDto) {
     await this.findOne(id);
-    return this.prisma.asset.update({ where: { id }, data: pickAllowed(data, ASSET_FIELDS) as never });
+    const site = data.siteId ? await this.prisma.site.findUnique({ where: { id: data.siteId } }) : null;
+    if (data.siteId && !site) throw new NotFoundException('Site not found');
+    const asset = await this.prisma.asset.update({
+      where: { id },
+      data: { ...this.toDatabase(data), ...(site ? { unidade: site.name } : {}) } as never,
+      include: { site: true },
+    });
+    return this.toApi(asset);
   }
 
   async remove(id: string) {
     await this.findOne(id);
     return this.prisma.asset.delete({ where: { id } });
+  }
+
+  private toDatabase(data: CreateAssetDto | UpdateAssetDto) {
+    return {
+      ...(data.siteId !== undefined ? { siteId: data.siteId } : {}),
+      ...(data.name !== undefined ? { nome: data.name } : {}),
+      ...(data.type !== undefined ? { tipo: data.type } : {}),
+      ...(data.manufacturer !== undefined ? { fabricante: data.manufacturer } : {}),
+      ...(data.model !== undefined ? { modelo: data.model } : {}),
+      ...(data.serialNumber !== undefined ? { serialNumber: data.serialNumber } : {}),
+      ...(data.criticality !== undefined ? { criticidade: data.criticality } : {}),
+      ...(data.status !== undefined ? { status: data.status } : {}),
+    };
+  }
+
+  private toApi(asset: Record<string, any>) {
+    return {
+      ...asset,
+      name: asset.nome,
+      type: asset.tipo,
+      manufacturer: asset.fabricante,
+      model: asset.modelo,
+      criticality: asset.criticidade,
+      location: asset.site?.name || asset.unidade,
+    };
   }
 }

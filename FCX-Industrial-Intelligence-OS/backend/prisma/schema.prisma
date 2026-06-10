@@ -34,6 +34,18 @@ enum AssetStatus {
   ALARM
 }
 
+enum RegistryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ALERT
+}
+
 enum AlarmSeverity {
   INFO
   WARNING
@@ -75,10 +87,13 @@ enum UserStatus {
 
 model Asset {
   id           String           @id @default(uuid())
+  siteId       String?          @map("site_id")
+  site         Site?            @relation(fields: [siteId], references: [id], onDelete: SetNull)
   nome         String
   tipo         AssetType
   fabricante   String?
   modelo       String?
+  serialNumber String?          @map("serial_number")
   unidade      String
   criticidade  AssetCriticality @default(MEDIUM)
   status       AssetStatus      @default(ONLINE)
@@ -89,8 +104,72 @@ model Asset {
   alarms       Alarm[]
   alarmEvents  AlarmEvent[]
   workOrders   WorkOrder[]
+  sensors      Sensor[]
 
+  @@index([siteId, status])
   @@map("assets")
+}
+
+model Company {
+  id           String         @id @default(uuid())
+  name         String
+  document     String         @unique
+  contactName  String         @map("contact_name")
+  contactEmail String         @map("contact_email")
+  contactPhone String         @map("contact_phone")
+  status       RegistryStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  sites        Site[]
+
+  @@map("companies")
+}
+
+model Site {
+  id        String         @id @default(uuid())
+  companyId String         @map("company_id")
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name      String
+  address   String
+  city      String
+  state     String
+  status    RegistryStatus @default(ACTIVE)
+  createdAt DateTime       @default(now()) @map("created_at")
+  assets    Asset[]
+  gateways  Gateway[]
+
+  @@index([companyId, status])
+  @@map("sites")
+}
+
+model Sensor {
+  id        String       @id @default(uuid())
+  assetId   String       @map("asset_id")
+  asset     Asset        @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  name      String
+  type      String
+  unit      String
+  protocol  String
+  mqttTopic String?      @map("mqtt_topic")
+  status    DeviceStatus @default(ONLINE)
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@index([assetId, status])
+  @@map("sensors")
+}
+
+model Gateway {
+  id        String       @id @default(uuid())
+  siteId    String       @map("site_id")
+  site      Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  name      String
+  model     String
+  ipAddress String       @map("ip_address")
+  protocol  String
+  status    DeviceStatus @default(ONLINE)
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@index([siteId, status])
+  @@map("gateways")
 }
 
 model TelemetryRaw {

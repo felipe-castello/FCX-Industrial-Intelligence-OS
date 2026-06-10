@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import Layout from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
-import { AlarmsPage, AssetsPage, TelemetryPage, WorkOrdersPage } from './pages/OperationsPages';
+import { AlarmsPage, TelemetryPage, WorkOrdersPage } from './pages/OperationsPages';
+import AssetsPage from './pages/AssetsPage';
 import PredictivePage from './pages/PredictivePage';
 import IntegrationsPage from './pages/IntegrationsPage';
 import { useApiHealth } from './api';

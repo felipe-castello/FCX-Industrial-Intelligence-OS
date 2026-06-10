@@ -18,7 +18,11 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard executivo" subtitle="Indicadores críticos para decisão e continuidade operacional." resource={resource} />
       <ResourceState resource={resource} />
       <section className="kpiGrid">
-        <Kpi label="Ativos monitorados" value={monitoredAssets || kpis.ativosMonitorados || 0} detail="inventário conectado" />
+        <Kpi label="Ativos monitorados" value={monitoredAssets || kpis.assetsCount || kpis.ativosMonitorados || 0} detail="inventário conectado" />
+        <Kpi label="Sensores" value={kpis.sensorsCount || 0} detail="pontos cadastrados" />
+        <Kpi label="Gateways" value={kpis.gatewaysCount || 0} detail="concentradores" />
+        <Kpi label="Ativos online" value={kpis.onlineAssets || 0} detail="em operação" />
+        <Kpi label="Ativos offline" value={kpis.offlineAssets || 0} detail="sem comunicação" tone={kpis.offlineAssets ? 'danger' : 'normal'} />
         <Kpi label="Alarmes ativos" value={activeAlarms} detail="requerem atenção" tone="danger" />
         <Kpi label="Temperatura média" value={`${formatNumber(kpis.temperaturaMedia, 1)} °C`} detail="janela operacional" />
         <Kpi label="Vibração média" value={`${formatNumber(kpis.vibracaoMedia, 2)} mm/s`} detail="condição mecânica" />

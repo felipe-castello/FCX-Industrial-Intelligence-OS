@@ -19,7 +19,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 button { color: inherit; }
 
 .appShell { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
@@ -104,12 +104,24 @@ h1 { font-size: 28px; line-height: 1.15; margin-bottom: 6px; }
 .scoreList strong { text-align: right; }
 .pill { background: #19262d; border: 1px solid #2d424c; border-radius: 999px; color: #b9c8ce; display: inline-flex; font-size: 10px; justify-content: center; padding: 3px 7px; text-transform: uppercase; white-space: nowrap; }
 .pill.online, .pill.healthy, .pill.ready, .pill.configured, .pill.closed, .pill.resolved { background: #112b23; border-color: #285a48; color: #8ce5b9; }
-.pill.critical, .pill.active, .pill.alarm, .pill.urgent { background: #30191e; border-color: #6c303a; color: #ff9ba5; }
-.pill.high, .pill.warning, .pill.attention, .pill.open, .pill.in-progress { background: #302518; border-color: #6f5126; color: #ffd18b; }
+.pill.critical, .pill.active, .pill.alarm, .pill.alert, .pill.offline, .pill.urgent { background: #30191e; border-color: #6c303a; color: #ff9ba5; }
+.pill.high, .pill.warning, .pill.attention, .pill.maintenance, .pill.open, .pill.in-progress { background: #302518; border-color: #6f5126; color: #ffd18b; }
 .pill.medium, .pill.monitored { color: #8eddf0; }
 
 .tableToolbar { align-items: center; display: flex; justify-content: space-between; margin: 16px 0 8px; }
 .tableToolbar > span { color: var(--muted); font-size: 11px; }
+.assetSummary { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.assetToolbar { align-items: center; display: flex; justify-content: space-between; margin: 20px 0 10px; }
+.assetToolbar strong, .assetToolbar span { display: block; }
+.assetToolbar strong { font-size: 14px; }
+.assetToolbar span { color: var(--muted); font-size: 11px; margin-top: 4px; }
+.primaryButton { align-items: center; background: #153741; border: 1px solid #347283; border-radius: 6px; color: #d9f5fb; cursor: pointer; display: inline-flex; gap: 8px; min-height: 38px; padding: 0 13px; }
+.primaryButton:disabled { cursor: wait; opacity: .65; }
+.assetForm { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 12px; padding: 16px; }
+.assetForm label { color: var(--muted); display: grid; font-size: 10px; gap: 6px; text-transform: uppercase; }
+.assetForm input, .assetForm select { background: var(--surface-2); border: 1px solid var(--line-bright); border-radius: 4px; color: var(--text); min-height: 38px; outline: none; padding: 0 9px; text-transform: none; }
+.assetForm input:focus, .assetForm select:focus { border-color: var(--cyan); }
+.formSubmit { align-self: end; justify-content: center; }
 .searchBox { align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--muted); display: flex; gap: 8px; max-width: 390px; padding: 0 10px; width: 100%; }
 .searchBox input { background: transparent; border: 0; color: var(--text); height: 38px; outline: none; width: 100%; }
 .tableWrap { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: auto; }
@@ -138,6 +150,8 @@ tbody tr:hover { background: #0e181e; }
 
 @media (max-width: 1250px) {
   .kpiGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .assetSummary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .assetForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .panelGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipeline { grid-template-columns: repeat(4, 1fr); }
 }
@@ -156,6 +170,7 @@ tbody tr:hover { background: #0e181e; }
   .pageHeader { align-items: stretch; flex-direction: column; }
   h1 { font-size: 23px; }
   .kpiGrid, .kpiGrid.compact, .panelGrid, .integrationSummary { grid-template-columns: 1fr; }
+  .assetSummary, .assetForm { grid-template-columns: 1fr; }
   .panel.wide { grid-column: auto; }
   .pipeline { grid-template-columns: repeat(2, 1fr); }
   .scoreList > div { grid-template-columns: 1fr; }

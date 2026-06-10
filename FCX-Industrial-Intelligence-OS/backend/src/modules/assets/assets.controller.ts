@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { AssetsService } from './assets.service';
+import { CreateAssetDto, UpdateAssetDto } from './dto/asset-management.dto';
 
 @Controller('assets')
 export class AssetsController {
@@ -16,12 +17,12 @@ export class AssetsController {
   }
 
   @Post()
-  create(@Body() data: Record<string, unknown>) {
+  create(@Body() data: CreateAssetDto) {
     return this.service.create(data);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() data: Record<string, unknown>) {
+  update(@Param('id') id: string, @Body() data: UpdateAssetDto) {
     return this.service.update(id, data);
   }
 

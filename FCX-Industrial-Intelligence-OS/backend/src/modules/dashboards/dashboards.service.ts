@@ -14,6 +14,10 @@ export class DashboardsService {
       recentTelemetry,
       criticalAlarms,
       criticalAssets,
+      sensorsCount,
+      gatewaysCount,
+      onlineAssets,
+      offlineAssets,
     ] = await Promise.all([
       this.prisma.asset.count(),
       this.prisma.alarm.count({ where: { status: 'ACTIVE' } }),
@@ -44,6 +48,10 @@ export class DashboardsService {
           _count: { select: { alarms: true, workOrders: true } },
         },
       }),
+      this.prisma.sensor.count(),
+      this.prisma.gateway.count(),
+      this.prisma.asset.count({ where: { status: 'ONLINE' } }),
+      this.prisma.asset.count({ where: { status: 'OFFLINE' } }),
     ]);
 
     const temperatureTrend = recentTelemetry
@@ -72,6 +80,11 @@ export class DashboardsService {
         vibracaoMedia: Number((telemetryAgg._avg.vibracao ?? 0).toFixed(2)),
         consumoEnergetico: Number((telemetryAgg._avg.potencia ?? 0).toFixed(2)),
         ordensAbertas: openWorkOrders,
+        assetsCount: assetsMonitored,
+        sensorsCount,
+        gatewaysCount,
+        onlineAssets,
+        offlineAssets,
       },
       widgets: {
         saudeAtivos: await this.assetHealth(),
