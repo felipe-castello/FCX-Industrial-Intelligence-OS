@@ -3,7 +3,7 @@ import { EmptyState, Kpi, PageHeader, Panel, ResourceState, Sparkline, StatusPil
 
 const fallback = { kpis: {}, widgets: {} };
 
-export default function DashboardPage({ activeCompanyId }) {
+export default function DashboardPage({ activeCompanyId, companies }) {
   const resource = useApiResource(withCompany('/dashboards', activeCompanyId), fallback);
   const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
   const alarms = useApiResource(withCompany('/alarms', activeCompanyId), []);
@@ -12,10 +12,11 @@ export default function DashboardPage({ activeCompanyId }) {
   const activeAlarms = Array.isArray(alarms.data) ? alarms.data.filter((alarm) => alarm.status === 'ACTIVE').length : 0;
   const healthRows = widgets.saudeAtivos || [];
   const total = healthRows.reduce((sum, item) => sum + item.total, 0) || 1;
+  const activeCompany = companies.data.find((company) => company.id === activeCompanyId);
 
   return (
     <>
-      <PageHeader title="Dashboard executivo" subtitle="Indicadores críticos para decisão e continuidade operacional." resource={resource} />
+      <PageHeader title="Dashboard executivo" subtitle={`Empresa ativa: ${activeCompany?.name || 'carregando...'} · Indicadores críticos para decisão e continuidade operacional.`} resource={resource} />
       <ResourceState resource={resource} />
       <section className="kpiGrid">
         <Kpi label="Ativos monitorados" value={monitoredAssets || kpis.assetsCount || kpis.ativosMonitorados || 0} detail="inventário conectado" />

@@ -17,7 +17,7 @@ async function main() {
   await prisma.company.deleteMany();
 
   const companies = [
-    ['1', 'FCX Interno'], ['2', 'Extrabom'], ['3', 'Carone'],
+    ['1', 'FCX Demo Industrial'], ['2', 'Extrabom'], ['3', 'Carone'],
     ['4', 'Realmar'], ['5', 'Terca Zilli'], ['6', 'Metal Trade'],
   ];
   await prisma.company.createMany({
@@ -143,7 +143,7 @@ async function main() {
     },
   });
 
-  console.log('Seed concluído: 6 empresas, FCX Interno com Rack MT100 e zero alarmes falsos.');
+  console.log('Seed concluído: 6 empresas, FCX Demo Industrial com Rack MT100 e zero alarmes falsos.');
 }
 
 main()
