@@ -61,7 +61,7 @@ services:
       dockerfile: Dockerfile
     container_name: fcx-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_API_URL: https://api.nexusiotenergy.com.br
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
@@ -81,7 +81,7 @@ services:
     command: ["node", "scripts/mqtt-simulator.js"]
     environment:
       MQTT_URL: ${MQTT_URL:-mqtt://emqx:1883}
-      API_URL: http://backend:3000
+      API_URL: https://api.nexusiotenergy.com.br
       MQTT_SIMULATOR_TOPIC_PREFIX: ${MQTT_SIMULATOR_TOPIC_PREFIX:-fcx/telemetry}
       MQTT_SIMULATOR_INTERVAL_MS: 5000
     depends_on:
