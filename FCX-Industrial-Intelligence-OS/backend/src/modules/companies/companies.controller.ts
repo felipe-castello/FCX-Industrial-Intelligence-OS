@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -11,6 +11,7 @@ export class CompaniesController {
   @Get(':id/dashboard') dashboard(@Param('id') id: string) { return this.service.dashboard(id); }
   @Get(':id') findOne(@Param('id') id: string) { return this.service.findOne(id); }
   @Post() create(@Body() data: CreateCompanyDto) { return this.service.create(data); }
+  @Put(':id') replace(@Param('id') id: string, @Body() data: UpdateCompanyDto) { return this.service.update(id, data); }
   @Patch(':id') update(@Param('id') id: string, @Body() data: UpdateCompanyDto) { return this.service.update(id, data); }
   @Delete(':id') remove(@Param('id') id: string) { return this.service.remove(id); }
 }

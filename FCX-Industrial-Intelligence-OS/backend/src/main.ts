@@ -40,7 +40,7 @@ async function bootstrap() {
   app.enableCors({
     origin: corsOrigin.split(',').map((origin) => origin.trim()),
     credentials: false,
-    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
   });
   app.use(securityMiddleware);
