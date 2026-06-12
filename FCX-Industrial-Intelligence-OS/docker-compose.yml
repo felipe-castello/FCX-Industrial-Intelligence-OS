@@ -43,6 +43,7 @@ services:
       MQTT_TELEMETRY_TOPIC: ${MQTT_TELEMETRY_TOPIC:-fcx/telemetry/+}
       JWT_SECRET: ${JWT_SECRET:-change_me}
       RUN_SEED: ${RUN_SEED:-true}
+      CORS_ORIGIN:  https://app.nexusiotenegy.com.br
     ports:
       - "${API_PORT:-3000}:3000"
     depends_on:
