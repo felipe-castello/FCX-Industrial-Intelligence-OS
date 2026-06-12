@@ -1,5 +1,6 @@
 import { Building2 } from 'lucide-react';
 import { DataTable, Kpi, PageHeader, ResourceState } from '../components/Common';
+import { RegistryCrud } from './RegistryPage';
 
 export default function CompaniesPage({ companies, activeCompanyId, setActiveCompanyId }) {
   const rows = companies.data.map((company) => ({
@@ -23,5 +24,6 @@ export default function CompaniesPage({ companies, activeCompanyId, setActiveCom
       </button>)}
     </div>
     <DataTable columns={[{ key: 'name', label: 'Empresa' }, { key: 'document', label: 'Documento' }, { key: 'contactName', label: 'Contato' }, { key: 'contactEmail', label: 'E-mail' }, { key: 'sitesCount', label: 'Sites' }, { key: 'assetsCount', label: 'Ativos' }, { key: 'status', label: 'Status', status: true }]} rows={rows} emptyMessage="Nenhuma empresa cadastrada." />
+    <RegistryCrud kind="companies" embedded />
   </>;
 }

@@ -5,9 +5,10 @@ import { AlarmsPage, TelemetryPage, WorkOrdersPage } from './pages/OperationsPag
 import AssetsPage from './pages/AssetsPage';
 import PredictivePage from './pages/PredictivePage';
 import IntegrationsPage from './pages/IntegrationsPage';
-import { useApiHealth } from './api';
-import { useApiResource } from './api';
+import { AUTH_ENABLED, hasSession, logout, useApiHealth, useApiResource } from './api';
 import CompaniesPage from './pages/CompaniesPage';
+import RegistryPage from './pages/RegistryPage';
+import AuthPage from './pages/AuthPage';
 
 const pages = {
   '/dashboard': DashboardPage,
@@ -18,6 +19,9 @@ const pages = {
   '/predictive': PredictivePage,
   '/integrations': IntegrationsPage,
   '/companies': CompaniesPage,
+  '/clients': (props) => <RegistryPage kind="clients" {...props} />,
+  '/sites': (props) => <RegistryPage kind="sites" {...props} />,
+  '/devices': (props) => <RegistryPage kind="devices" {...props} />,
 };
 
 function normalizeRoute(pathname) {
@@ -25,6 +29,7 @@ function normalizeRoute(pathname) {
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(() => !AUTH_ENABLED || hasSession());
   const [route, setRoute] = useState(normalizeRoute(window.location.pathname));
   const { health, check } = useApiHealth();
   const companies = useApiResource('/companies', []);
@@ -51,8 +56,10 @@ export default function App() {
     setRoute(path);
   }
 
+  if (!authenticated) return <AuthPage onAuthenticated={() => window.location.reload()} />;
+
   return (
-    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId}>
+    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} onLogout={AUTH_ENABLED ? async () => { await logout(); setAuthenticated(false); } : null}>
       <Page companies={companies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} />
     </Layout>
   );

@@ -22,5 +22,5 @@ export class CompaniesService {
   async update(id: string, data: UpdateCompanyDto) { await this.findOne(id); return this.prisma.company.update({ where: { id }, data: data as never }); }
   async remove(id: string) { await this.findOne(id); return this.prisma.company.delete({ where: { id } }); }
   async assets(id: string) { await this.findOne(id); return this.prisma.asset.findMany({ where: { companyId: id }, orderBy: { createdAt: 'desc' }, include: { site: true, _count: { select: { sensors: true, telemetry: true, alarms: true, workOrders: true } } } }); }
-  async dashboard(id: string) { await this.findOne(id); return this.dashboards.overview(id); }
+  async dashboard(id: string) { await this.findOne(id); return this.dashboards.overview({ companyId: id }); }
 }

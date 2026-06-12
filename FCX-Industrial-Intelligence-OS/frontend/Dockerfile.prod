@@ -10,7 +10,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 ARG VITE_API_URL=https://api.fcx.local
+ARG VITE_AUTH_ENABLED=false
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_AUTH_ENABLED=$VITE_AUTH_ENABLED
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

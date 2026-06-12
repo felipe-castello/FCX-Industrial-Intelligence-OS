@@ -5,8 +5,29 @@ import { PrismaService } from '../../database/prisma.service';
 export class DashboardsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async overview(companyId?: string) {
-    const companyWhere = companyId ? { companyId } : {};
+  async overview(filters: { companyId?: string; clientId?: string; siteId?: string; assetId?: string; deviceId?: string } = {}) {
+    const optionalAnd = (conditions: Record<string, unknown>[]) => conditions.length ? { AND: conditions } : {};
+    const assetWhere = optionalAnd([
+      ...(filters.companyId ? [{ companyId: filters.companyId }] : []),
+      ...(filters.clientId ? [{ site: { clientId: filters.clientId } }] : []),
+      ...(filters.siteId ? [{ siteId: filters.siteId }] : []),
+      ...(filters.assetId ? [{ id: filters.assetId }] : []),
+      ...(filters.deviceId ? [{ devices: { some: { id: filters.deviceId } } }] : []),
+    ]);
+    const telemetryWhere = optionalAnd([
+      ...(filters.companyId ? [{ companyId: filters.companyId }] : []),
+      ...(filters.clientId ? [{ asset: { site: { clientId: filters.clientId } } }] : []),
+      ...(filters.siteId ? [{ asset: { siteId: filters.siteId } }] : []),
+      ...(filters.assetId ? [{ assetId: filters.assetId }] : []),
+      ...(filters.deviceId ? [{ asset: { devices: { some: { id: filters.deviceId } } } }] : []),
+    ]);
+    const eventWhere = optionalAnd([
+      ...(filters.companyId ? [{ companyId: filters.companyId }] : []),
+      ...(filters.clientId ? [{ asset: { site: { clientId: filters.clientId } } }] : []),
+      ...(filters.siteId ? [{ asset: { siteId: filters.siteId } }] : []),
+      ...(filters.assetId ? [{ assetId: filters.assetId }] : []),
+      ...(filters.deviceId ? [{ asset: { devices: { some: { id: filters.deviceId } } } }] : []),
+    ]);
     const [
       assetsMonitored,
       activeAlarms,
@@ -20,11 +41,11 @@ export class DashboardsService {
       onlineAssets,
       offlineAssets,
     ] = await Promise.all([
-      this.prisma.asset.count({ where: companyWhere }),
-      this.prisma.alarm.count({ where: { ...companyWhere, status: 'ACTIVE' } }),
-      this.prisma.workOrder.count({ where: { ...companyWhere, status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_PARTS'] } } }),
+      this.prisma.asset.count({ where: assetWhere }),
+      this.prisma.alarm.count({ where: { ...eventWhere, status: 'ACTIVE' } }),
+      this.prisma.workOrder.count({ where: { ...eventWhere, status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_PARTS'] } } }),
       this.prisma.telemetry.aggregate({
-        where: companyWhere,
+        where: telemetryWhere,
         _avg: {
           temperatura: true,
           vibracao: true,
@@ -32,29 +53,29 @@ export class DashboardsService {
         },
       }),
       this.prisma.telemetry.findMany({
-        where: companyWhere,
+        where: telemetryWhere,
         orderBy: { timestamp: 'desc' },
         take: 120,
         include: { asset: true },
       }),
       this.prisma.alarm.findMany({
-        where: { ...companyWhere, status: 'ACTIVE', severidade: 'CRITICAL' },
+        where: { ...eventWhere, status: 'ACTIVE', severidade: 'CRITICAL' },
         orderBy: { timestamp: 'desc' },
         take: 10,
         include: { asset: true },
       }),
       this.prisma.asset.findMany({
-        where: { ...companyWhere, criticidade: { in: ['HIGH', 'CRITICAL'] } },
+        where: { ...assetWhere, criticidade: { in: ['HIGH', 'CRITICAL'] } },
         orderBy: [{ criticidade: 'desc' }, { createdAt: 'desc' }],
         take: 10,
         include: {
           _count: { select: { alarms: true, workOrders: true } },
         },
       }),
-      this.prisma.sensor.count({ where: companyId ? { asset: { companyId } } : undefined }),
-      this.prisma.gateway.count({ where: companyId ? { site: { companyId } } : undefined }),
-      this.prisma.asset.count({ where: { ...companyWhere, status: 'ONLINE' } }),
-      this.prisma.asset.count({ where: { ...companyWhere, status: 'OFFLINE' } }),
+      this.prisma.sensor.count({ where: Object.keys(assetWhere).length ? { asset: assetWhere } : undefined }),
+      this.prisma.gateway.count({ where: filters.companyId || filters.clientId || filters.siteId ? { site: { ...(filters.companyId ? { companyId: filters.companyId } : {}), ...(filters.clientId ? { clientId: filters.clientId } : {}), ...(filters.siteId ? { id: filters.siteId } : {}) } } : undefined }),
+      this.prisma.asset.count({ where: { ...assetWhere, status: 'ONLINE' } }),
+      this.prisma.asset.count({ where: { ...assetWhere, status: 'OFFLINE' } }),
     ]);
 
     const temperatureTrend = recentTelemetry
@@ -90,7 +111,7 @@ export class DashboardsService {
         offlineAssets,
       },
       widgets: {
-        saudeAtivos: await this.assetHealth(companyId),
+        saudeAtivos: await this.assetHealth(assetWhere),
         alarmesCriticos: criticalAlarms,
         tendenciaTemperatura: temperatureTrend,
         tendenciaVibracao: vibrationTrend,
@@ -104,10 +125,10 @@ export class DashboardsService {
     };
   }
 
-  private async assetHealth(companyId?: string) {
+  private async assetHealth(where: Record<string, unknown>) {
     const grouped = await this.prisma.asset.groupBy({
       by: ['status'],
-      where: companyId ? { companyId } : undefined,
+      where: where as never,
       _count: { status: true },
     });
 

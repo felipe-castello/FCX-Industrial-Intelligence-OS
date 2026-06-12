@@ -5,6 +5,7 @@ type IncomingRequest = {
   path?: string;
   originalUrl?: string;
   headers?: Record<string, string | string[] | undefined>;
+  user?: JwtPayload;
 };
 
 type OutgoingResponse = {
@@ -22,18 +23,20 @@ const safeEqual = (left: string, right: string) => {
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
 };
 
-const verifyJwtHs256 = (token: string, secret: string) => {
+type JwtPayload = { sub?: string; role?: string; companyId?: string; permissions?: string[]; exp?: number; nbf?: number };
+
+const verifyJwtHs256 = (token: string, secret: string): JwtPayload | null => {
   const parts = token.split('.');
 
   if (parts.length !== 3) {
-    return false;
+    return null;
   }
 
   const [encodedHeader, encodedPayload, signature] = parts;
   const header = JSON.parse(base64UrlDecode(encodedHeader).toString('utf8')) as { alg?: string; typ?: string };
 
   if (header.alg !== 'HS256') {
-    return false;
+    return null;
   }
 
   const expectedSignature = createHmac('sha256', secret)
@@ -41,40 +44,61 @@ const verifyJwtHs256 = (token: string, secret: string) => {
     .digest('base64url');
 
   if (!safeEqual(signature, expectedSignature)) {
-    return false;
+    return null;
   }
 
-  const payload = JSON.parse(base64UrlDecode(encodedPayload).toString('utf8')) as { exp?: number; nbf?: number };
+  const payload = JSON.parse(base64UrlDecode(encodedPayload).toString('utf8')) as JwtPayload;
   const now = Math.floor(Date.now() / 1000);
 
   if (payload.exp && payload.exp < now) {
-    return false;
+    return null;
   }
 
   if (payload.nbf && payload.nbf > now) {
-    return false;
+    return null;
   }
 
-  return true;
+  return payload;
 };
 
 const isProtectedRequest = (request: IncomingRequest) => {
   const method = (request.method || 'GET').toUpperCase();
   const path = request.path || request.originalUrl || '/';
 
-  if (path === '/health') {
+  if (path === '/health' || path === '/metrics') {
     return false;
   }
 
-  if (path.startsWith('/users')) {
-    return true;
+  if (path.startsWith('/auth/')) {
+    return false;
   }
 
-  if (path.startsWith('/integrations') || path.startsWith('/acquisition')) {
-    return method !== 'GET';
-  }
+  return !['HEAD', 'OPTIONS'].includes(method);
+};
 
-  return !['GET', 'HEAD', 'OPTIONS'].includes(method);
+const rolePermissions: Record<string, string[]> = {
+  MASTER_ADMIN: ['*'],
+  ADMIN: ['*'],
+  FCX_ADMIN: ['read', 'create', 'update', 'delete'],
+  MANAGER: ['read', 'create', 'update'],
+  SUPERVISOR: ['read', 'create', 'update'],
+  ENGINEER: ['read', 'create', 'update'],
+  TECHNICIAN: ['read', 'update'],
+  CLIENT: ['read'],
+  VIEWER: ['read'],
+};
+
+const actionFor = (method = 'GET') => ({ POST: 'create', PUT: 'update', PATCH: 'update', DELETE: 'delete' } as Record<string, string>)[method.toUpperCase()] || 'read';
+
+const canAccess = (request: IncomingRequest, payload: JwtPayload) => {
+  if ((process.env.SECURITY_RBAC_ENABLED || 'false') !== 'true') return true;
+  const path = request.path || request.originalUrl || '/';
+  if (path.startsWith('/roles') || path.startsWith('/permissions') || path.startsWith('/audit-logs')) {
+    return ['MASTER_ADMIN', 'FCX_ADMIN', 'ADMIN'].includes(payload.role || '');
+  }
+  const action = actionFor(request.method);
+  const allowed = rolePermissions[payload.role || 'VIEWER'] || [];
+  return allowed.includes('*') || allowed.includes(action) || payload.permissions?.includes('*') || payload.permissions?.includes(action) || false;
 };
 
 const readHeader = (headers: IncomingRequest['headers'], name: string) => {
@@ -83,7 +107,7 @@ const readHeader = (headers: IncomingRequest['headers'], name: string) => {
 };
 
 export const securityMiddleware = (request: IncomingRequest, response: OutgoingResponse, next: NextFunction) => {
-  const authEnabled = (process.env.SECURITY_AUTH_ENABLED || (process.env.NODE_ENV === 'production' ? 'true' : 'false')) !== 'false';
+  const authEnabled = (process.env.SECURITY_AUTH_ENABLED || 'false') === 'true';
 
   if (!authEnabled || !isProtectedRequest(request)) {
     next();
@@ -101,6 +125,7 @@ export const securityMiddleware = (request: IncomingRequest, response: OutgoingR
   const providedApiKey = readHeader(request.headers, 'x-api-key');
 
   if (apiKey && providedApiKey && safeEqual(providedApiKey, apiKey)) {
+    request.user = { role: 'MASTER_ADMIN', permissions: ['*'] };
     next();
     return;
   }
@@ -110,7 +135,13 @@ export const securityMiddleware = (request: IncomingRequest, response: OutgoingR
 
   if (jwtSecret && token) {
     try {
-      if (verifyJwtHs256(token, jwtSecret)) {
+      const payload = verifyJwtHs256(token, jwtSecret);
+      if (payload) {
+        if (!canAccess(request, payload)) {
+          response.status(403).json({ error: 'Insufficient permissions.' });
+          return;
+        }
+        request.user = payload;
         next();
         return;
       }

@@ -1,7 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const API_URL = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br').replace(/\/$/, '');
+export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
+const ACCESS_TOKEN_KEY = 'fcx.accessToken';
+const REFRESH_TOKEN_KEY = 'fcx.refreshToken';
+
+export const hasSession = () => Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
+export const clearSession = () => {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
+export async function login(email, password) {
+  const session = await apiRequest('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+  localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
+  return session;
+}
+
+export async function logout() {
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (refreshToken) await apiRequest('/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) }).catch(() => undefined);
+  clearSession();
+}
 
 export function withCompany(path, companyId) {
   if (!companyId) return path;
@@ -15,6 +37,7 @@ export async function apiRequest(path, options = {}) {
     headers: {
       Accept: 'application/json',
       ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
+      ...(AUTH_ENABLED && localStorage.getItem(ACCESS_TOKEN_KEY) ? { Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN_KEY)}` } : {}),
       ...fetchOptions.headers,
     },
   });

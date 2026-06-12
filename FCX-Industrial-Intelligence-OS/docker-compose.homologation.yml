@@ -1,0 +1,71 @@
+services:
+  postgres-hml:
+    image: timescale/timescaledb:2.15.3-pg16
+    container_name: fcx-hml-postgres
+    environment:
+      POSTGRES_USER: ${HML_POSTGRES_USER:-fcx_hml}
+      POSTGRES_PASSWORD: ${HML_POSTGRES_PASSWORD:-fcx_hml_password}
+      POSTGRES_DB: ${HML_POSTGRES_DB:-fcx_hml}
+    ports:
+      - "${HML_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres_hml_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [fcx_hml]
+
+  redis-hml:
+    image: redis:7-alpine
+    container_name: fcx-hml-redis
+    ports:
+      - "${HML_REDIS_PORT:-56379}:6379"
+    networks: [fcx_hml]
+
+  emqx-hml:
+    image: emqx/emqx:5.7.2
+    container_name: fcx-hml-emqx
+    ports:
+      - "${HML_MQTT_PORT:-51883}:1883"
+      - "${HML_EMQX_DASHBOARD_PORT:-58083}:18083"
+    networks: [fcx_hml]
+
+  backend-hml:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: fcx-hml-backend
+    environment:
+      NODE_ENV: staging
+      API_PORT: 3000
+      DATABASE_URL: postgresql://${HML_POSTGRES_USER:-fcx_hml}:${HML_POSTGRES_PASSWORD:-fcx_hml_password}@postgres-hml:5432/${HML_POSTGRES_DB:-fcx_hml}
+      REDIS_URL: redis://redis-hml:6379
+      MQTT_URL: mqtt://emqx-hml:1883
+      MQTT_TELEMETRY_TOPIC: fcx/hml/telemetry/+
+      JWT_SECRET: ${HML_JWT_SECRET:-fcx_hml_jwt_secret_change_before_shared_staging}
+      API_KEY: ${HML_API_KEY:-fcx_hml_api_key}
+      SECURITY_AUTH_ENABLED: "true"
+      SECURITY_RBAC_ENABLED: "true"
+      AUTH_EXPOSE_RESET_TOKEN: "true"
+      INITIAL_ADMIN_PASSWORD: ${HML_INITIAL_ADMIN_PASSWORD:-FCX-Hml-Admin-ChangeMe!}
+      RUN_SEED: "true"
+    ports:
+      - "${HML_API_PORT:-53000}:3000"
+    depends_on:
+      postgres-hml:
+        condition: service_healthy
+      redis-hml:
+        condition: service_started
+      emqx-hml:
+        condition: service_started
+    networks: [fcx_hml]
+
+volumes:
+  postgres_hml_data:
+    name: fcx_hml_postgres_data
+
+networks:
+  fcx_hml:
+    name: fcx_hml_network

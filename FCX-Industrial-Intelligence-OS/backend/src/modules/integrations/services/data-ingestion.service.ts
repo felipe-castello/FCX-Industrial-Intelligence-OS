@@ -25,9 +25,14 @@ export class DataIngestionService {
       return { accepted: false, reason: 'assetId missing', telemetry, prediction };
     }
 
+    const asset = await this.prisma.asset.findUnique({ where: { id: telemetry.assetId }, include: { site: true } });
     const stored = await this.prisma.telemetry.create({
       data: {
         assetId: telemetry.assetId,
+        companyId: payload.companyId || asset?.companyId,
+        clientId: payload.clientId || asset?.site?.clientId,
+        siteId: payload.siteId || asset?.siteId,
+        deviceId: payload.deviceId,
         timestamp: telemetry.timestamp,
         temperatura: telemetry.temperatura,
         vibracao: telemetry.vibracao,

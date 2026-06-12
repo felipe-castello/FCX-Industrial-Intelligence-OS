@@ -125,6 +125,17 @@ h1 { font-size: 28px; line-height: 1.15; margin-bottom: 6px; }
 .assetForm input, .assetForm select { background: var(--surface-2); border: 1px solid var(--line-bright); border-radius: 4px; color: var(--text); min-height: 38px; outline: none; padding: 0 9px; text-transform: none; }
 .assetForm input:focus, .assetForm select:focus { border-color: var(--cyan); }
 .formSubmit { align-self: end; justify-content: center; }
+.registryEmbedded { border-top: 1px solid var(--line); margin-top: 24px; padding-top: 20px; }
+.registryEmbedded h2 { font-size: 15px; }
+.registryForm { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.recordDetail { background: var(--surface); border: 1px solid var(--line); margin-bottom: 12px; padding: 14px; }
+.recordDetail pre { color: var(--muted); font-size: 10px; max-height: 220px; overflow: auto; white-space: pre-wrap; }
+.rowActions { display: flex; flex-wrap: wrap; gap: 5px; min-width: 310px; }
+.rowActions button { align-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: 4px; color: var(--muted); cursor: pointer; display: inline-flex; gap: 5px; min-height: 30px; justify-content: center; padding: 0 8px; white-space: nowrap; }
+.rowActions button span { font-size: 10px; }
+.dashboardFilters { align-items: end; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 10px; grid-template-columns: repeat(4, minmax(120px, 1fr)) auto; margin-bottom: 14px; padding: 12px; }
+.dashboardFilters label { color: var(--muted); display: grid; font-size: 9px; gap: 5px; text-transform: uppercase; }
+.dashboardFilters select { background: var(--surface-2); border: 1px solid var(--line-bright); color: var(--text); min-height: 34px; padding: 0 7px; }
 .companyGrid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 12px; }
 .companyCard { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; color: var(--text); cursor: pointer; display: grid; gap: 6px; min-height: 105px; padding: 14px; text-align: left; }
 .companyCard svg { color: var(--cyan); }
@@ -155,12 +166,22 @@ tbody tr:hover { background: #0e181e; }
 .tagList { display: flex; flex-wrap: wrap; gap: 7px; }
 .tagList span { background: var(--surface-2); border: 1px solid var(--line); color: #b7cad2; font-size: 11px; padding: 7px 9px; }
 .mobileOnly { display: none; }
+.authPage { align-items: center; background: #081116; display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+.authPanel { background: var(--surface); border: 1px solid var(--line-bright); border-radius: 6px; display: grid; gap: 14px; max-width: 380px; padding: 28px; width: 100%; }
+.authPanel h1, .authPanel p { margin: 0; text-align: center; }
+.authPanel p { color: var(--muted); font-size: 12px; }
+.authPanel label { color: var(--muted); display: grid; font-size: 10px; gap: 6px; text-transform: uppercase; }
+.authPanel input { background: var(--surface-2); border: 1px solid var(--line-bright); color: var(--text); min-height: 40px; padding: 0 10px; }
+.authPanel .primaryButton { justify-content: center; }
+.authMark { align-items: center; background: #153741; border: 1px solid #347283; display: flex; height: 48px; justify-content: center; margin: 0 auto; width: 48px; }
+.authLink { background: transparent; border: 0; color: var(--cyan); cursor: pointer; font-size: 11px; }
 
 @media (max-width: 1250px) {
   .kpiGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .assetSummary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .assetForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .companyGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboardFilters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .panelGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pipeline { grid-template-columns: repeat(4, 1fr); }
 }
@@ -182,6 +203,7 @@ tbody tr:hover { background: #0e181e; }
   .kpiGrid, .kpiGrid.compact, .panelGrid, .integrationSummary { grid-template-columns: 1fr; }
   .assetSummary, .assetForm { grid-template-columns: 1fr; }
   .companyGrid { grid-template-columns: 1fr; }
+  .dashboardFilters { grid-template-columns: 1fr; }
   .panel.wide { grid-column: auto; }
   .pipeline { grid-template-columns: repeat(2, 1fr); }
   .scoreList > div { grid-template-columns: 1fr; }

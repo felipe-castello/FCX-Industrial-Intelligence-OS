@@ -4,9 +4,12 @@ import {
   Building2,
   Boxes,
   ClipboardList,
+  Cpu,
   Gauge,
   LayoutDashboard,
   Menu,
+  MapPin,
+  LogOut,
   RadioTower,
   RefreshCw,
   ServerCog,
@@ -19,7 +22,10 @@ import { API_URL, useApiResource, withCompany } from '../api';
 const navigation = [
   { path: '/dashboard', label: 'Visão executiva', icon: LayoutDashboard },
   { path: '/companies', label: 'Empresas', icon: Building2 },
+  { path: '/clients', label: 'Clientes', icon: Building2 },
+  { path: '/sites', label: 'Unidades', icon: MapPin },
   { path: '/assets', label: 'Ativos', icon: Boxes },
+  { path: '/devices', label: 'Dispositivos', icon: Cpu },
   { path: '/telemetry', label: 'Telemetria', icon: RadioTower },
   { path: '/alarms', label: 'Alarmes', icon: TriangleAlert },
   { path: '/work-orders', label: 'Manutenção / OS', icon: ClipboardList },
@@ -27,7 +33,7 @@ const navigation = [
   { path: '/integrations', label: 'Integrações', icon: ServerCog },
 ];
 
-export default function Layout({ route, navigate, health, checkHealth, companies, activeCompanyId, setActiveCompanyId, children }) {
+export default function Layout({ route, navigate, health, checkHealth, companies, activeCompanyId, setActiveCompanyId, onLogout, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
   const online = health.status === 'ok';
@@ -69,6 +75,7 @@ export default function Layout({ route, navigate, health, checkHealth, companies
               <RefreshCw size={14} />
             </button>
             <span className="deviceBadge">{connectedDevices} Dispositivos Conectados</span>
+            {onLogout ? <button className="iconButton" onClick={onLogout} title="Sair"><LogOut size={17} /></button> : null}
           </div>
         </header>
         {!online && health.status !== 'checking' ? (

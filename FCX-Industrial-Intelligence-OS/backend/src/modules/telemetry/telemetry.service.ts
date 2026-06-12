@@ -6,6 +6,9 @@ import { pickAllowed } from '../../security/sanitize';
 const TELEMETRY_FIELDS = [
   'assetId',
   'companyId',
+  'clientId',
+  'siteId',
+  'deviceId',
   'timestamp',
   'temperatura',
   'vibracao',
@@ -45,9 +48,16 @@ export class TelemetryService {
   }
 
   async create(data: Record<string, unknown>) {
-    const asset = await this.prisma.asset.findUnique({ where: { id: String(data.assetId || '') } });
+    const asset = await this.prisma.asset.findUnique({ where: { id: String(data.assetId || '') }, include: { site: true } });
     const fields = pickAllowed<Record<string, unknown>>(data, TELEMETRY_FIELDS);
-    return this.prisma.telemetry.create({ data: { ...fields, companyId: data.companyId || asset?.companyId } as never });
+    return this.prisma.telemetry.create({
+      data: {
+        ...fields,
+        companyId: data.companyId || asset?.companyId,
+        clientId: data.clientId || asset?.site?.clientId,
+        siteId: data.siteId || asset?.siteId,
+      } as never,
+    });
   }
 
   async update(id: string, data: Record<string, unknown>) {
