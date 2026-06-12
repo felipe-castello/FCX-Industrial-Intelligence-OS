@@ -62,6 +62,21 @@ services:
         condition: service_started
     networks: [fcx_hml]
 
+  frontend-hml:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: http://2.25.190.98:53000
+        VITE_AUTH_ENABLED: "true"
+    container_name: fcx-hml-frontend
+    ports:
+      - "55173:80"
+    depends_on:
+      backend-hml:
+        condition: service_started
+    networks: [fcx_hml]
+
 volumes:
   postgres_hml_data:
     name: fcx_hml_postgres_data
