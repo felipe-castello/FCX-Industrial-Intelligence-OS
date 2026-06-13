@@ -86,6 +86,11 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       API_KEY: ${API_KEY}
       SECURITY_AUTH_ENABLED: ${SECURITY_AUTH_ENABLED:-true}
+      SECURITY_RBAC_ENABLED: ${SECURITY_RBAC_ENABLED:-false}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_DAYS: ${JWT_REFRESH_EXPIRES_DAYS:-30}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
       REQUEST_BODY_LIMIT: ${REQUEST_BODY_LIMIT:-1mb}
       CORS_ORIGIN: ${CORS_ORIGIN}
       RUN_SEED: ${RUN_SEED:-false}
@@ -126,6 +131,7 @@ services:
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: ${PUBLIC_API_URL}
+        VITE_AUTH_ENABLED: ${VITE_AUTH_ENABLED:-true}
     container_name: fcx-production-frontend
     restart: unless-stopped
     depends_on:

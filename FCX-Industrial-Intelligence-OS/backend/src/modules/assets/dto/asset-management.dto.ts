@@ -1,7 +1,7 @@
 import { IsEmail, IsIn, IsIP, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 const registryStatuses = ['ACTIVE', 'INACTIVE'];
-const deviceStatuses = ['ONLINE', 'OFFLINE', 'MAINTENANCE', 'ALERT'];
+const deviceStatuses = ['ONLINE', 'OFFLINE', 'MAINTENANCE', 'ALERT', 'INACTIVE'];
 const assetStatuses = ['ONLINE', 'OFFLINE', 'MAINTENANCE', 'ALARM'];
 const assetCriticalities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
 const assetTypes = ['COMPRESSOR', 'RACK', 'COLD_ROOM', 'EVAPORATOR', 'CONDENSER', 'PANEL', 'SENSOR', 'PUMP', 'FAN', 'OTHER'];
@@ -25,7 +25,8 @@ export class UpdateCompanyDto {
 }
 
 export class CreateSiteDto {
-  @IsString() @IsNotEmpty() companyId: string;
+  @IsOptional() @IsString() @IsNotEmpty() companyId?: string | null;
+  @IsOptional() @IsString() @IsNotEmpty() clientId?: string | null;
   @IsString() @IsNotEmpty() name: string;
   @IsString() @IsNotEmpty() address: string;
   @IsString() @IsNotEmpty() city: string;
@@ -34,7 +35,8 @@ export class CreateSiteDto {
 }
 
 export class UpdateSiteDto {
-  @IsOptional() @IsString() @IsNotEmpty() companyId?: string;
+  @IsOptional() @IsString() @IsNotEmpty() companyId?: string | null;
+  @IsOptional() @IsString() @IsNotEmpty() clientId?: string | null;
   @IsOptional() @IsString() @IsNotEmpty() name?: string;
   @IsOptional() @IsString() @IsNotEmpty() address?: string;
   @IsOptional() @IsString() @IsNotEmpty() city?: string;
@@ -43,23 +45,27 @@ export class UpdateSiteDto {
 }
 
 export class CreateAssetDto {
-  @IsString() @IsNotEmpty() siteId: string;
+  @IsOptional() @IsString() @IsNotEmpty() siteId?: string | null;
   @IsString() @IsNotEmpty() name: string;
   @IsIn(assetTypes) type: string;
   @IsOptional() @IsString() manufacturer?: string;
+  @IsOptional() @IsString() brand?: string;
   @IsOptional() @IsString() model?: string;
   @IsOptional() @IsString() serialNumber?: string;
+  @IsOptional() @IsString() location?: string;
   @IsOptional() @IsIn(assetCriticalities) criticality?: string;
   @IsOptional() @IsIn(assetStatuses) status?: string;
 }
 
 export class UpdateAssetDto {
-  @IsOptional() @IsString() @IsNotEmpty() siteId?: string;
+  @IsOptional() @IsString() @IsNotEmpty() siteId?: string | null;
   @IsOptional() @IsString() @IsNotEmpty() name?: string;
   @IsOptional() @IsIn(assetTypes) type?: string;
   @IsOptional() @IsString() manufacturer?: string;
+  @IsOptional() @IsString() brand?: string;
   @IsOptional() @IsString() model?: string;
   @IsOptional() @IsString() serialNumber?: string;
+  @IsOptional() @IsString() location?: string;
   @IsOptional() @IsIn(assetCriticalities) criticality?: string;
   @IsOptional() @IsIn(assetStatuses) status?: string;
 }

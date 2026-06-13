@@ -1,10 +1,17 @@
+import { useState } from 'react';
 import { useApiResource, withCompany } from '../api';
 import { EmptyState, Kpi, PageHeader, Panel, ResourceState, Sparkline, StatusPill, WAITING_FOR_DEVICES, formatNumber } from '../components/Common';
 
 const fallback = { kpis: {}, widgets: {} };
 
 export default function DashboardPage({ activeCompanyId, companies }) {
-  const resource = useApiResource(withCompany('/dashboards', activeCompanyId), fallback);
+  const [filters, setFilters] = useState({ clientId: '', siteId: '', assetId: '', deviceId: '' });
+  const clients = useApiResource('/clients', []);
+  const sites = useApiResource(withCompany('/sites', activeCompanyId), []);
+  const assetsForFilter = useApiResource(withCompany('/assets', activeCompanyId), []);
+  const devices = useApiResource('/devices', []);
+  const dashboardPath = Object.entries(filters).reduce((path, [key, value]) => value ? `${path}${path.includes('?') ? '&' : '?'}${key}=${encodeURIComponent(value)}` : path, withCompany('/dashboards', activeCompanyId));
+  const resource = useApiResource(dashboardPath, fallback);
   const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
   const alarms = useApiResource(withCompany('/alarms', activeCompanyId), []);
   const { kpis = {}, widgets = {} } = resource.data;
@@ -18,6 +25,10 @@ export default function DashboardPage({ activeCompanyId, companies }) {
     <>
       <PageHeader title="Dashboard executivo" subtitle={`Empresa ativa: ${activeCompany?.name || 'carregando...'} · Indicadores críticos para decisão e continuidade operacional.`} resource={resource} />
       <ResourceState resource={resource} />
+      <section className="dashboardFilters">
+        {[['clientId', 'Cliente', clients.data], ['siteId', 'Unidade', sites.data], ['assetId', 'Ativo', assetsForFilter.data.map((item) => ({ ...item, name: item.name || item.nome }))], ['deviceId', 'Dispositivo', devices.data]].map(([key, label, options]) => <label key={key}><span>{label}</span><select value={filters[key]} onChange={(event) => setFilters((current) => ({ ...current, [key]: event.target.value }))}><option value="">Todos</option>{options.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>)}
+        <button className="refreshButton" onClick={() => setFilters({ clientId: '', siteId: '', assetId: '', deviceId: '' })}>Limpar filtros</button>
+      </section>
       <section className="kpiGrid">
         <Kpi label="Ativos monitorados" value={monitoredAssets || kpis.assetsCount || kpis.ativosMonitorados || 0} detail="inventário conectado" />
         <Kpi label="Sensores" value={kpis.sensorsCount || 0} detail="pontos cadastrados" />

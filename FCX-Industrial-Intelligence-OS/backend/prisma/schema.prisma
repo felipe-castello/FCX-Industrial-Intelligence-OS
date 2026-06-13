@@ -44,6 +44,7 @@ enum DeviceStatus {
   OFFLINE
   MAINTENANCE
   ALERT
+  INACTIVE
 }
 
 enum AlarmSeverity {
@@ -78,6 +79,10 @@ enum UserRole {
   ENGINEER
   TECHNICIAN
   VIEWER
+  MASTER_ADMIN
+  FCX_ADMIN
+  SUPERVISOR
+  CLIENT
 }
 
 enum UserStatus {
@@ -96,10 +101,13 @@ model Asset {
   fabricante   String?
   modelo       String?
   serialNumber String?          @map("serial_number")
+  brand        String?
+  location     String?
   unidade      String
   criticidade  AssetCriticality @default(MEDIUM)
   status       AssetStatus      @default(ONLINE)
   createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
   telemetry    Telemetry[]
   telemetryRaw TelemetryRaw[]
   telemetryProcessed TelemetryProcessed[]
@@ -107,10 +115,28 @@ model Asset {
   alarmEvents  AlarmEvent[]
   workOrders   WorkOrder[]
   sensors      Sensor[]
+  devices      Device[]
 
   @@index([companyId, status])
   @@index([siteId, status])
   @@map("assets")
+}
+
+model Client {
+  id        String         @id @default(uuid())
+  name      String
+  cnpj      String         @unique
+  email     String
+  phone     String
+  address   String
+  city      String
+  state     String
+  status    RegistryStatus @default(ACTIVE)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+  sites     Site[]
+
+  @@map("clients")
 }
 
 model Company {
@@ -134,19 +160,39 @@ model Company {
 
 model Site {
   id        String         @id @default(uuid())
-  companyId String         @map("company_id")
-  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String?        @map("company_id")
+  company   Company?       @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  clientId  String?        @map("client_id")
+  client    Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
   name      String
   address   String
   city      String
   state     String
   status    RegistryStatus @default(ACTIVE)
   createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
   assets    Asset[]
   gateways  Gateway[]
 
   @@index([companyId, status])
+  @@index([clientId, status])
   @@map("sites")
+}
+
+model Device {
+  id           String       @id @default(uuid())
+  assetId      String?      @map("asset_id")
+  asset        Asset?       @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  name         String
+  serialNumber String       @unique @map("serial_number")
+  deviceType   String       @map("device_type")
+  protocol     String
+  status       DeviceStatus @default(ONLINE)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  @@index([assetId, status])
+  @@map("devices")
 }
 
 model Sensor {
@@ -241,6 +287,9 @@ model Telemetry {
   id               String   @id @default(uuid())
   companyId        String?  @map("company_id")
   company          Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  clientId         String?  @map("client_id")
+  siteId           String?  @map("site_id")
+  deviceId         String?  @map("device_id")
   assetId          String   @map("asset_id")
   asset            Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
   timestamp        DateTime @default(now())
@@ -253,6 +302,9 @@ model Telemetry {
   pressaoDescarga  Float    @map("pressao_descarga")
 
   @@index([companyId, timestamp])
+  @@index([clientId, timestamp])
+  @@index([siteId, timestamp])
+  @@index([deviceId, timestamp])
   @@index([assetId, timestamp])
   @@map("telemetry")
 }
@@ -294,15 +346,100 @@ model WorkOrder {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  companyId String?    @map("company_id")
-  company   Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  nome      String
-  email     String     @unique
-  role      UserRole   @default(VIEWER)
-  status    UserStatus @default(ACTIVE)
-  createdAt DateTime   @default(now()) @map("created_at")
+  id             String               @id @default(uuid())
+  companyId      String?              @map("company_id")
+  company        Company?             @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  roleId         String?              @map("role_id")
+  roleProfile    Role?                @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  nome           String
+  email          String               @unique
+  passwordHash   String?              @map("password_hash")
+  role           UserRole             @default(VIEWER)
+  status         UserStatus           @default(ACTIVE)
+  lastLoginAt    DateTime?            @map("last_login_at")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+  refreshTokens  AuthRefreshToken[]
+  passwordResets PasswordResetToken[]
+  auditLogs      AuditLog[]
 
   @@index([companyId, status])
+  @@index([roleId, status])
   @@map("users")
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  key         String           @unique
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model AuthRefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, expiresAt])
+  @@map("auth_refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  resource   String
+  resourceId String?  @map("resource_id")
+  method     String?
+  path       String?
+  ipAddress  String?  @map("ip_address")
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([action, resource, createdAt])
+  @@map("audit_logs")
 }

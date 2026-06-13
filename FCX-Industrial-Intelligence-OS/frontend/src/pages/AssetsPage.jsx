@@ -2,6 +2,7 @@ import { Plus, Save, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { apiRequest, useApiResource, withCompany } from '../api';
 import { DataTable, Kpi, PageHeader, ResourceState } from '../components/Common';
+import { RegistryCrud } from './RegistryPage';
 
 const initialForm = {
   siteId: '',
@@ -117,6 +118,7 @@ export default function AssetsPage({ activeCompanyId }) {
         rows={rows}
         emptyMessage="Nenhum dispositivo conectado para esta empresa."
       />
+      <RegistryCrud kind="assets" activeCompanyId={activeCompanyId} embedded />
     </>
   );
 }

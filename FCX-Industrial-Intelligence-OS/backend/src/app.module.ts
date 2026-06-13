@@ -14,6 +14,7 @@ import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
     HealthModule,
     MetricsModule,
     DatabaseModule,
+    AuthModule,
     AssetsModule,
     CompaniesModule,
     TelemetryModule,

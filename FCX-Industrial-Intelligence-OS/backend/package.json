@@ -12,7 +12,10 @@
     "db:seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
     "security:jwt": "node scripts/generate-jwt.js",
-    "mqtt:simulator": "node scripts/mqtt-simulator.js"
+    "mqtt:simulator": "node scripts/mqtt-simulator.js",
+    "test:regression": "node --test test/safe-multi-company.regression.test.js test/auth-rbac.regression.test.js",
+    "test:e2e:production": "node --test test/multi-company.production.e2e.test.js",
+    "test:e2e:homologation": "node --test test/auth-rbac.homologation.e2e.test.js"
   },
   "dependencies": {
     "@nestjs/common": "latest",

@@ -5,8 +5,8 @@ import { PrismaService } from '../../database/prisma.service';
 export class AssetRegistryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  sites(companyId?: string) {
-    return this.prisma.site.findMany({ where: companyId ? { companyId } : undefined, orderBy: { createdAt: 'desc' }, include: { company: true, _count: { select: { assets: true, gateways: true } } } });
+  sites(companyId?: string, clientId?: string) {
+    return this.prisma.site.findMany({ where: { ...(companyId ? { companyId } : {}), ...(clientId ? { clientId } : {}) }, orderBy: { createdAt: 'desc' }, include: { company: true, client: true, _count: { select: { assets: true, gateways: true } } } });
   }
 
   site(id: string) {

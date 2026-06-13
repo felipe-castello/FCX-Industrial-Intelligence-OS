@@ -6,9 +6,14 @@ import { CreateAssetDto, UpdateAssetDto } from './dto/asset-management.dto';
 export class AssetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(companyId?: string) {
+  async findAll(filters: { companyId?: string; clientId?: string; siteId?: string; deviceId?: string } = {}) {
     const assets = await this.prisma.asset.findMany({
-      where: companyId ? { companyId } : undefined,
+      where: {
+        ...(filters.companyId ? { companyId: filters.companyId } : {}),
+        ...(filters.siteId ? { siteId: filters.siteId } : {}),
+        ...(filters.clientId ? { site: { clientId: filters.clientId } } : {}),
+        ...(filters.deviceId ? { devices: { some: { id: filters.deviceId } } } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         site: true,
@@ -39,10 +44,14 @@ export class AssetsService {
   }
 
   async create(data: CreateAssetDto) {
-    const site = await this.prisma.site.findUnique({ where: { id: data.siteId } });
-    if (!site) throw new NotFoundException('Site not found');
+    const site = data.siteId ? await this.prisma.site.findUnique({ where: { id: data.siteId } }) : null;
+    if (data.siteId && !site) throw new NotFoundException('Site not found');
     const asset = await this.prisma.asset.create({
-      data: { ...this.toDatabase(data), companyId: site.companyId, unidade: site.name } as never,
+      data: {
+        ...this.toDatabase(data),
+        ...(site?.companyId ? { companyId: site.companyId } : {}),
+        unidade: data.location || site?.name || 'SEM UNIDADE',
+      } as never,
       include: { site: true },
     });
     return this.toApi(asset);
@@ -71,8 +80,10 @@ export class AssetsService {
       ...(data.name !== undefined ? { nome: data.name } : {}),
       ...(data.type !== undefined ? { tipo: data.type } : {}),
       ...(data.manufacturer !== undefined ? { fabricante: data.manufacturer } : {}),
+      ...(data.brand !== undefined ? { brand: data.brand, fabricante: data.brand } : {}),
       ...(data.model !== undefined ? { modelo: data.model } : {}),
       ...(data.serialNumber !== undefined ? { serialNumber: data.serialNumber } : {}),
+      ...(data.location !== undefined ? { location: data.location, unidade: data.location } : {}),
       ...(data.criticality !== undefined ? { criticidade: data.criticality } : {}),
       ...(data.status !== undefined ? { status: data.status } : {}),
     };
@@ -84,9 +95,10 @@ export class AssetsService {
       name: asset.nome,
       type: asset.tipo,
       manufacturer: asset.fabricante,
+      brand: asset.brand || asset.fabricante,
       model: asset.modelo,
       criticality: asset.criticidade,
-      location: asset.site?.name || asset.unidade,
+      location: asset.location || asset.site?.name || asset.unidade,
     };
   }
 }
