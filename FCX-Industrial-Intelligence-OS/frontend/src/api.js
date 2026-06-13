@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export const API_URL = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br').replace(/\/$/, '');
+const configuredApiUrl = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br/api').replace(/\/+$/, '');
+export const API_URL = configuredApiUrl.endsWith('/api') ? configuredApiUrl : `${configuredApiUrl}/api`;
 export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 const ACCESS_TOKEN_KEY = 'fcx.accessToken';
@@ -31,6 +32,22 @@ export async function login(email, password) {
   localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
   localStorage.setItem(USER_KEY, JSON.stringify(session.user));
   return session;
+}
+
+export function forgotPassword(email) {
+  return apiRequest('/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function resetPassword(token, password) {
+  return apiRequest('/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  });
 }
 
 export async function logout() {

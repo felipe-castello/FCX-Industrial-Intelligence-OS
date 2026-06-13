@@ -115,6 +115,17 @@ test('frontend logout clears browser session, invalidates user context and redir
   assert.match(userMenu, /onClick=\{onLogout\}/);
 });
 
+test('frontend authentication uses the global API prefix for every auth operation', () => {
+  const api = read('../frontend/src/api.js');
+  const productionEnv = read('../.env.production.example');
+  assert.match(api, /https:\/\/api\.nexusiotenergy\.com\.br\/api/);
+  assert.match(api, /configuredApiUrl\.endsWith\('\/api'\)/);
+  for (const route of ['/auth/login', '/auth/logout', '/auth/refresh', '/auth/forgot-password', '/auth/reset-password']) {
+    assert.ok(api.includes(route), `missing prefixed auth client route ${route}`);
+  }
+  assert.match(productionEnv, /PUBLIC_API_URL=https:\/\/api\.fcx\.local\/api/);
+});
+
 test('local compose enables authentication and RBAC by default', () => {
   const compose = read('../docker-compose.yml');
   const env = read('../.env.example');

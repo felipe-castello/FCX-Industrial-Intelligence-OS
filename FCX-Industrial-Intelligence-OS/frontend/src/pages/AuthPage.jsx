@@ -1,6 +1,6 @@
 import { LockKeyhole } from 'lucide-react';
 import { useState } from 'react';
-import { apiRequest, login } from '../api';
+import { forgotPassword, login } from '../api';
 
 export default function AuthPage({ onAuthenticated }) {
   const [mode, setMode] = useState('login');
@@ -16,7 +16,7 @@ export default function AuthPage({ onAuthenticated }) {
         const session = await login(email, password);
         onAuthenticated(session);
       } else {
-        await apiRequest('/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        await forgotPassword(email);
         setMessage('Solicitação recebida. Verifique as instruções de recuperação.');
       }
     } catch {
