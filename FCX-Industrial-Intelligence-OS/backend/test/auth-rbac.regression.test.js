@@ -46,6 +46,14 @@ test('passwords and tokens are stored only as hashes', () => {
   assert.doesNotMatch(users, /select: \{[^}]*passwordHash/);
 });
 
+test('users service exposes the UserRole enum instead of the internal roleId relation', () => {
+  const users = read('src/modules/users/users.service.ts');
+  assert.match(users, /import \{ UserRole \} from '@prisma\/client'/);
+  assert.match(users, /Object\.values\(UserRole\)/);
+  assert.match(users, /const USER_FIELDS = \['companyId', 'nome', 'email', 'role', 'status'\]/);
+  assert.doesNotMatch(users, /roleId/);
+});
+
 test('RBAC profiles, roles, permissions and audit models exist', () => {
   const schema = read('prisma/schema.prisma');
   for (const role of ['MASTER_ADMIN', 'FCX_ADMIN', 'SUPERVISOR', 'TECHNICIAN', 'CLIENT']) assert.match(schema, new RegExp(role));
