@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export const API_URL = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br').replace(/\/$/, '');
-export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
+export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 const ACCESS_TOKEN_KEY = 'fcx.accessToken';
 const REFRESH_TOKEN_KEY = 'fcx.refreshToken';

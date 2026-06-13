@@ -83,14 +83,16 @@ test('frontend authentication remains optional and production image accepts its 
   const api = read('../frontend/src/api.js');
   const app = read('../frontend/src/App.jsx');
   const dockerfile = read('../frontend/Dockerfile.prod');
-  assert.match(api, /VITE_AUTH_ENABLED === 'true'/);
+  assert.match(api, /VITE_AUTH_ENABLED !== 'false'/);
   assert.match(app, /<AuthPage/);
-  assert.match(dockerfile, /ARG VITE_AUTH_ENABLED=false/);
+  assert.match(dockerfile, /ARG VITE_AUTH_ENABLED=true/);
 });
 
 test('frontend logout clears browser session, invalidates user context and redirects to login', () => {
   const api = read('../frontend/src/api.js');
   const app = read('../frontend/src/App.jsx');
+  const layout = read('../frontend/src/components/Layout.jsx');
+  const userMenu = read('../frontend/src/components/UserMenu.jsx');
   for (const key of ['ACCESS_TOKEN_KEY', 'REFRESH_TOKEN_KEY', 'USER_KEY']) {
     assert.match(api, new RegExp(`localStorage\\.removeItem\\(${key}\\)`));
   }
@@ -100,6 +102,20 @@ test('frontend logout clears browser session, invalidates user context and redir
   assert.match(api, /localStorage\.setItem\(REFRESH_TOKEN_KEY, session\.refreshToken\)/);
   assert.match(app, /setAuthState\(\{ authenticated: false, user: null \}\)/);
   assert.match(app, /window\.history\.replaceState\(\{\}, '', '\/login'\)/);
+  assert.match(layout, /<UserMenu user=\{currentUser\} onLogout=\{onLogout\}/);
+  assert.match(userMenu, />Sair</);
+  assert.match(userMenu, /onClick=\{onLogout\}/);
+});
+
+test('local compose enables authentication and RBAC by default', () => {
+  const compose = read('../docker-compose.yml');
+  const env = read('../.env.example');
+  assert.match(compose, /SECURITY_AUTH_ENABLED: \$\{SECURITY_AUTH_ENABLED:-true\}/);
+  assert.match(compose, /SECURITY_RBAC_ENABLED: \$\{SECURITY_RBAC_ENABLED:-true\}/);
+  assert.match(compose, /VITE_AUTH_ENABLED: \$\{VITE_AUTH_ENABLED:-true\}/);
+  assert.match(env, /SECURITY_AUTH_ENABLED=true/);
+  assert.match(env, /SECURITY_RBAC_ENABLED=true/);
+  assert.match(env, /VITE_AUTH_ENABLED=true/);
 });
 
 test('homologation environment is isolated from production', () => {

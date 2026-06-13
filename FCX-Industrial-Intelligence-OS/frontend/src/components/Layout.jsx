@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Menu,
   MapPin,
-  LogOut,
   RadioTower,
   RefreshCw,
   ServerCog,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { API_URL, useApiResource, withCompany } from '../api';
+import UserMenu from './UserMenu';
 
 const navigation = [
   { path: '/dashboard', label: 'Visão executiva', icon: LayoutDashboard },
@@ -33,7 +33,7 @@ const navigation = [
   { path: '/integrations', label: 'Integrações', icon: ServerCog },
 ];
 
-export default function Layout({ route, navigate, health, checkHealth, companies, activeCompanyId, setActiveCompanyId, onLogout, children }) {
+export default function Layout({ route, navigate, health, checkHealth, companies, activeCompanyId, setActiveCompanyId, currentUser, onLogout, children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const assets = useApiResource(withCompany('/assets', activeCompanyId), []);
   const online = health.status === 'ok';
@@ -75,7 +75,7 @@ export default function Layout({ route, navigate, health, checkHealth, companies
               <RefreshCw size={14} />
             </button>
             <span className="deviceBadge">{connectedDevices} Dispositivos Conectados</span>
-            {onLogout ? <button className="iconButton" onClick={onLogout} title="Sair"><LogOut size={17} /></button> : null}
+            {onLogout ? <UserMenu user={currentUser} onLogout={onLogout} /> : null}
           </div>
         </header>
         {!online && health.status !== 'checking' ? (
