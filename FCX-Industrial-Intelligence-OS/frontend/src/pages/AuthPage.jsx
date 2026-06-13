@@ -13,8 +13,8 @@ export default function AuthPage({ onAuthenticated }) {
     setMessage('');
     try {
       if (mode === 'login') {
-        await login(email, password);
-        onAuthenticated();
+        const session = await login(email, password);
+        onAuthenticated(session);
       } else {
         await apiRequest('/auth/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
         setMessage('Solicitação recebida. Verifique as instruções de recuperação.');

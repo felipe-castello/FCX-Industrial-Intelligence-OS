@@ -5,7 +5,7 @@ import { AlarmsPage, TelemetryPage, WorkOrdersPage } from './pages/OperationsPag
 import AssetsPage from './pages/AssetsPage';
 import PredictivePage from './pages/PredictivePage';
 import IntegrationsPage from './pages/IntegrationsPage';
-import { AUTH_ENABLED, hasSession, logout, useApiHealth, useApiResource } from './api';
+import { AUTH_ENABLED, getSessionUser, hasSession, logout, useApiHealth, useApiResource } from './api';
 import CompaniesPage from './pages/CompaniesPage';
 import RegistryPage from './pages/RegistryPage';
 import AuthPage from './pages/AuthPage';
@@ -29,7 +29,10 @@ function normalizeRoute(pathname) {
 }
 
 export default function App() {
-  const [authenticated, setAuthenticated] = useState(() => !AUTH_ENABLED || hasSession());
+  const [authState, setAuthState] = useState(() => ({
+    authenticated: !AUTH_ENABLED || hasSession(),
+    user: AUTH_ENABLED ? getSessionUser() : null,
+  }));
   const [route, setRoute] = useState(normalizeRoute(window.location.pathname));
   const { health, check } = useApiHealth();
   const companies = useApiResource('/companies', []);
@@ -56,10 +59,39 @@ export default function App() {
     setRoute(path);
   }
 
-  if (!authenticated) return <AuthPage onAuthenticated={() => window.location.reload()} />;
+  function handleAuthenticated(session) {
+    setAuthState({ authenticated: true, user: session.user });
+    window.history.replaceState({}, '', '/dashboard');
+    setRoute('/dashboard');
+  }
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } finally {
+      setAuthState({ authenticated: false, user: null });
+      window.history.replaceState({}, '', '/login');
+      setRoute('/login');
+    }
+  }
+
+  useEffect(() => {
+    const clearUserContext = () => setAuthState({ authenticated: false, user: null });
+    window.addEventListener('fcx:session-cleared', clearUserContext);
+    return () => window.removeEventListener('fcx:session-cleared', clearUserContext);
+  }, []);
+
+  useEffect(() => {
+    if (AUTH_ENABLED && !authState.authenticated && window.location.pathname !== '/login') {
+      window.history.replaceState({}, '', '/login');
+      setRoute('/login');
+    }
+  }, [authState.authenticated]);
+
+  if (!authState.authenticated) return <AuthPage onAuthenticated={handleAuthenticated} />;
 
   return (
-    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} onLogout={AUTH_ENABLED ? async () => { await logout(); setAuthenticated(false); } : null}>
+    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} currentUser={authState.user} onLogout={AUTH_ENABLED ? handleLogout : null}>
       <Page companies={companies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} />
     </Layout>
   );

@@ -5,24 +5,49 @@ export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED === 'true';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 const ACCESS_TOKEN_KEY = 'fcx.accessToken';
 const REFRESH_TOKEN_KEY = 'fcx.refreshToken';
+const USER_KEY = 'fcx.user';
+let refreshPromise = null;
 
-export const hasSession = () => Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
+export const hasSession = () => Boolean(localStorage.getItem(ACCESS_TOKEN_KEY) && localStorage.getItem(REFRESH_TOKEN_KEY));
+export const getSessionUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+  } catch {
+    return null;
+  }
+};
+
 export const clearSession = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+  sessionStorage.clear();
+  window.dispatchEvent(new CustomEvent('fcx:session-cleared'));
 };
 
 export async function login(email, password) {
   const session = await apiRequest('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
   localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
   localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
+  localStorage.setItem(USER_KEY, JSON.stringify(session.user));
   return session;
 }
 
 export async function logout() {
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-  if (refreshToken) await apiRequest('/auth/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refreshToken }) }).catch(() => undefined);
-  clearSession();
+  try {
+    if (refreshToken) {
+      await apiRequest('/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+  } catch {
+    // Local logout must complete even when the API is unavailable.
+  } finally {
+    clearSession();
+  }
 }
 
 export function withCompany(path, companyId) {
@@ -32,7 +57,7 @@ export function withCompany(path, companyId) {
 
 export async function apiRequest(path, options = {}) {
   const { allowNotFound = false, fallback, ...fetchOptions } = options;
-  const response = await fetch(`${API_URL}${path}`, {
+  const request = () => fetch(`${API_URL}${path}`, {
     ...fetchOptions,
     headers: {
       Accept: 'application/json',
@@ -41,6 +66,12 @@ export async function apiRequest(path, options = {}) {
       ...fetchOptions.headers,
     },
   });
+  let response = await request();
+
+  if (AUTH_ENABLED && response.status === 401 && !path.startsWith('/auth/')) {
+    const renewed = await refreshSession();
+    if (renewed) response = await request();
+  }
 
   if (allowNotFound && response.status === 404) {
     return fallback;
@@ -55,6 +86,38 @@ export async function apiRequest(path, options = {}) {
   }
 
   return response.json();
+}
+
+async function refreshSession() {
+  const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+  if (!refreshToken) {
+    clearSession();
+    return false;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Refresh token rejected');
+        const session = await response.json();
+        localStorage.setItem(ACCESS_TOKEN_KEY, session.accessToken);
+        localStorage.setItem(REFRESH_TOKEN_KEY, session.refreshToken);
+        return true;
+      })
+      .catch(() => {
+        clearSession();
+        return false;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
 }
 
 function normalizeResource(payload, fallback) {

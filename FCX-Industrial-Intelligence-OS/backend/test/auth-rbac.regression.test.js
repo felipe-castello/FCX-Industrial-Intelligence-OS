@@ -88,6 +88,20 @@ test('frontend authentication remains optional and production image accepts its 
   assert.match(dockerfile, /ARG VITE_AUTH_ENABLED=false/);
 });
 
+test('frontend logout clears browser session, invalidates user context and redirects to login', () => {
+  const api = read('../frontend/src/api.js');
+  const app = read('../frontend/src/App.jsx');
+  for (const key of ['ACCESS_TOKEN_KEY', 'REFRESH_TOKEN_KEY', 'USER_KEY']) {
+    assert.match(api, new RegExp(`localStorage\\.removeItem\\(${key}\\)`));
+  }
+  assert.match(api, /sessionStorage\.clear\(\)/);
+  assert.match(api, /finally \{\s*clearSession\(\)/);
+  assert.match(api, /fetch\(`\$\{API_URL\}\/auth\/refresh`/);
+  assert.match(api, /localStorage\.setItem\(REFRESH_TOKEN_KEY, session\.refreshToken\)/);
+  assert.match(app, /setAuthState\(\{ authenticated: false, user: null \}\)/);
+  assert.match(app, /window\.history\.replaceState\(\{\}, '', '\/login'\)/);
+});
+
 test('homologation environment is isolated from production', () => {
   const compose = read('../docker-compose.homologation.yml');
   const script = read('../scripts/validate-homologation.ps1');
