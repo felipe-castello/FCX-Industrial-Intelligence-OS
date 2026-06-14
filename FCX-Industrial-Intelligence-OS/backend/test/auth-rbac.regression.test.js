@@ -106,7 +106,7 @@ test('frontend logout clears browser session, invalidates user context and redir
   }
   assert.match(api, /sessionStorage\.clear\(\)/);
   assert.match(api, /finally \{\s*clearSession\(\)/);
-  assert.match(api, /fetch\(`\$\{API_URL\}\/auth\/refresh`/);
+  assert.match(api, /fetch\(`\$\{API_BASE_URL\}\/auth\/refresh`/);
   assert.match(api, /localStorage\.setItem\(REFRESH_TOKEN_KEY, session\.refreshToken\)/);
   assert.match(app, /setAuthState\(\{ authenticated: false, user: null \}\)/);
   assert.match(app, /window\.history\.replaceState\(\{\}, '', '\/login'\)/);
@@ -115,15 +115,16 @@ test('frontend logout clears browser session, invalidates user context and redir
   assert.match(userMenu, /onClick=\{onLogout\}/);
 });
 
-test('frontend authentication uses the global API prefix for every auth operation', () => {
+test('frontend authentication calls auth routes without an extra API prefix', () => {
   const api = read('../frontend/src/api.js');
   const productionEnv = read('../.env.production.example');
-  assert.match(api, /https:\/\/api\.nexusiotenergy\.com\.br\/api/);
-  assert.match(api, /configuredApiUrl\.endsWith\('\/api'\)/);
+  assert.match(api, /API_BASE_URL = \(import\.meta\.env\.VITE_API_URL \|\| 'https:\/\/api\.nexusiotenergy\.com\.br'\)/);
+  assert.doesNotMatch(api, /configuredApiUrl|endsWith\('\/api'\)|`\$\{configuredApiUrl\}\/api`/);
   for (const route of ['/auth/login', '/auth/logout', '/auth/refresh', '/auth/forgot-password', '/auth/reset-password']) {
-    assert.ok(api.includes(route), `missing prefixed auth client route ${route}`);
+    assert.ok(api.includes(route), `missing direct auth client route ${route}`);
   }
-  assert.match(productionEnv, /PUBLIC_API_URL=https:\/\/api\.fcx\.local\/api/);
+  assert.match(productionEnv, /PUBLIC_API_URL=https:\/\/api\.fcx\.local$/m);
+  assert.doesNotMatch(productionEnv, /^PUBLIC_API_URL=.*\/api(?:\/|$)/m);
 });
 
 test('local compose enables authentication and RBAC by default', () => {

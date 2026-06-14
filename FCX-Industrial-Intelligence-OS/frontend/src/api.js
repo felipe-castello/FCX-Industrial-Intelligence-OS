@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const configuredApiUrl = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br/api').replace(/\/+$/, '');
-export const API_URL = configuredApiUrl.endsWith('/api') ? configuredApiUrl : `${configuredApiUrl}/api`;
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br').replace(/\/+$/, '');
+export const API_URL = API_BASE_URL;
 export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 const ACCESS_TOKEN_KEY = 'fcx.accessToken';
@@ -74,7 +74,7 @@ export function withCompany(path, companyId) {
 
 export async function apiRequest(path, options = {}) {
   const { allowNotFound = false, fallback, ...fetchOptions } = options;
-  const request = () => fetch(`${API_URL}${path}`, {
+  const request = () => fetch(`${API_BASE_URL}${path}`, {
     ...fetchOptions,
     headers: {
       Accept: 'application/json',
@@ -113,7 +113,7 @@ async function refreshSession() {
   }
 
   if (!refreshPromise) {
-    refreshPromise = fetch(`${API_URL}/auth/refresh`, {
+    refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
