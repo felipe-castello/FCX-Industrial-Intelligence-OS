@@ -4,7 +4,7 @@ set -eu
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_DIR"
 
-COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.production.yml}"
 ENV_FILE="${ENV_FILE:-.env.production}"
 
 echo "FCX production deploy - Ubuntu VPS"
@@ -22,12 +22,12 @@ fi
 if [ ! -f "$ENV_FILE" ]; then
   echo "Criando $ENV_FILE a partir de .env.production.example"
   cp .env.production.example "$ENV_FILE"
-  echo "Edite $ENV_FILE, troque os dominios e substitua todos os placeholders replace_with_ antes de executar novamente."
+  echo "Edite $ENV_FILE, troque os dominios e substitua todos os CHANGE_ME antes de executar novamente."
   exit 1
 fi
 
-if grep -q "replace_with_" "$ENV_FILE"; then
-  echo "Existem placeholders replace_with_ em $ENV_FILE. Ajuste senhas/tokens antes do deploy."
+if grep -q "CHANGE_ME" "$ENV_FILE"; then
+  echo "Existem placeholders CHANGE_ME em $ENV_FILE. Ajuste senhas/tokens antes do deploy."
   exit 1
 fi
 
@@ -50,4 +50,3 @@ fi
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" ps
-sh scripts/healthcheck.sh

@@ -1,20 +1,5 @@
 # FCX Industrial Intelligence OS
 
-## Agent Master Vibe Coding
-
-The FCX 6.0 Agent Master architecture is integrated into the existing backend agents module.
-
-- [Architecture](docs/AGENT_MASTER_VIBE_CODING_ARCHITECTURE.md)
-- [Workflow and task routing](docs/AGENT_MASTER_WORKFLOW.md)
-- [Decision logs and approval gates](docs/AGENT_MASTER_APPROVALS_AND_DECISIONS.md)
-- [Versioned agent definitions](agents/README.md)
-- [Phase 2 governance status](docs/AGENT_MASTER_PHASE_2_STATUS.md)
-- [Phase 3 executable orchestration](docs/AGENT_MASTER_PHASE_3_EXECUTABLE_ORCHESTRATION.md)
-- [Phase 4 industrial validation](docs/AGENT_MASTER_PHASE_4_INDUSTRIAL_VALIDATION.md)
-- [Phase 4 validation results](docs/validation/PHASE_4_INDUSTRIAL_VALIDATION_REPORT.md)
-- [Phase 5 operational runtime](docs/AGENT_MASTER_PHASE_5_RUNTIME_OPERATIONAL.md)
-- [Phase 5 runtime validation results](docs/validation/PHASE_5_RUNTIME_VALIDATION_REPORT.md)
-
 MVP de inteligencia industrial para ativos, telemetria, alarmes, ordens de servico e dashboards executivos.
 
 ## Stack
@@ -47,20 +32,6 @@ A arquitetura completa de integracoes esta documentada em:
 - `docs/DEPLOY-VPS-HOSTINGER.md`
 - `docs/GO-LIVE-REVIEW.md`
 - `docs/OBSERVABILIDADE-SRE.md`
-
-## FCX 6.0 Modular Intelligence
-
-O FCX 6.0 adiciona modulos externos independentes em `fcx-6.0/modules`, sem misturar codigo no core principal:
-
-- `agent-skills`
-- `librechat`
-- `langchain`
-- `nango`
-- `quantdinger`
-- `understand-anything`
-- `trading-agents`
-
-A camada FCX fica em `fcx-6.0/apps` e `fcx-6.0/packages`, com adapters carregados por feature flags. Documentacao: `docs/FCX_6_MODULES_INTEGRATION.md`.
 
 ## Deploy em VPS Hostinger
 
@@ -107,46 +78,6 @@ Observabilidade:
 ```bash
 ./scripts/test-whatsapp-alert.sh
 ```
-
-## Deploy em VPS — FCX 6.0
-
-Deploy alvo:
-
-- App: https://app.nexusiotenergy.com.br
-- API: https://api.nexusiotenergy.com.br
-- Grafana: https://grafana.nexusiotenergy.com.br
-
-Arquivos principais:
-
-- `docker-compose.prod.yml`
-- `.env.production.example`
-- `backend/Dockerfile.prod`
-- `frontend/Dockerfile.prod`
-- `fcx-6.0/Dockerfile.worker`
-- `deployment/nginx/nginx.conf`
-- `scripts/deploy.sh`
-- `scripts/backup-db.sh`
-- `scripts/restore-db.sh`
-- `scripts/healthcheck.sh`
-- `docs/DEPLOY_VPS_FCX_6.md`
-
-Comandos:
-
-```bash
-cp .env.production.example .env.production
-chmod +x scripts/*.sh backend/docker-entrypoint.prod.sh
-nano .env.production
-./scripts/deploy.sh
-./scripts/healthcheck.sh
-```
-
-Healthcheck:
-
-```text
-GET https://api.nexusiotenergy.com.br/api/health
-```
-
-Feature flags FCX 6.0 ficam desligadas por padrao para modulos externos, exceto `ENABLE_LANGCHAIN=true`. QuantDinger permanece restrito a `research` e `simulation`, sem execucao de ordens financeiras reais.
 
 Dashboards operacionais ficam no Grafana em `FCX Operations`.
 

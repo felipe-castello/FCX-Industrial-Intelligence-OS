@@ -120,7 +120,7 @@
     "tasksFailed": 0,
     "tokensConsumed": 0,
     "activeAgents": [],
-    "averageWorkflowDurationMs": 8,
+    "averageWorkflowDurationMs": 5,
     "sla": {
       "targetMs": 30000,
       "breaches": 0
@@ -129,68 +129,68 @@
   "reports": [
     {
       "workflow": {
-        "workflowId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
+        "workflowId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
         "name": "FCX Runtime Operational Validation",
         "goal": "Execute a complete local FCX Agent Operating System workflow",
         "tenantId": "fcx-runtime-validation",
         "requestedBy": "phase5-validation",
         "status": "completed",
         "stepTaskIds": [
-          "3a286f1a-376b-4d15-b377-37eb72559102",
-          "c6452b7d-6171-47f0-9495-fbd70d696697",
-          "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
-          "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b"
+          "23d2ee4d-660e-4394-a158-a75806781c0b",
+          "f3695bc3-4054-496f-92d3-4d58c241939b",
+          "1b8ced33-ed91-4467-9179-e21a096846ea",
+          "f1a16a74-0726-45d4-b651-3a5bd5c953b4"
         ],
-        "startedAt": "2026-06-15T19:25:57.962Z",
-        "completedAt": "2026-06-15T19:25:57.970Z",
-        "durationMs": 8
+        "startedAt": "2026-06-15T19:52:34.946Z",
+        "completedAt": "2026-06-15T19:52:34.951Z",
+        "durationMs": 5
       },
       "summary": "FCX Runtime Operational Validation completed 4 local runtime steps.",
       "results": [
         {
-          "taskId": "3a286f1a-376b-4d15-b377-37eb72559102",
+          "taskId": "23d2ee4d-660e-4394-a158-a75806781c0b",
           "agentId": "software-architect",
           "status": "completed",
           "summary": "software-architect completed the local runtime workflow step.",
           "evidence": [
-            "runtime:70b3d9f6-dd34-4660-ad14-9d0593908cdb:software-architect",
+            "runtime:ac2cf158-f851-4d52-a4b9-0c1142fc4e02:software-architect",
             "external-operations:none"
           ]
         },
         {
-          "taskId": "c6452b7d-6171-47f0-9495-fbd70d696697",
+          "taskId": "f3695bc3-4054-496f-92d3-4d58c241939b",
           "agentId": "backend",
           "status": "completed",
           "summary": "backend completed the local runtime workflow step.",
           "evidence": [
-            "runtime:70b3d9f6-dd34-4660-ad14-9d0593908cdb:backend",
+            "runtime:ac2cf158-f851-4d52-a4b9-0c1142fc4e02:backend",
             "external-operations:none"
           ]
         },
         {
-          "taskId": "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
+          "taskId": "1b8ced33-ed91-4467-9179-e21a096846ea",
           "agentId": "qa",
           "status": "completed",
           "summary": "qa completed the local runtime workflow step.",
           "evidence": [
-            "runtime:70b3d9f6-dd34-4660-ad14-9d0593908cdb:qa",
+            "runtime:ac2cf158-f851-4d52-a4b9-0c1142fc4e02:qa",
             "external-operations:none"
           ]
         },
         {
-          "taskId": "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b",
+          "taskId": "f1a16a74-0726-45d4-b651-3a5bd5c953b4",
           "agentId": "documentation",
           "status": "completed",
           "summary": "documentation completed the local runtime workflow step.",
           "evidence": [
-            "runtime:70b3d9f6-dd34-4660-ad14-9d0593908cdb:documentation",
+            "runtime:ac2cf158-f851-4d52-a4b9-0c1142fc4e02:documentation",
             "external-operations:none"
           ]
         }
       ],
       "auditTrail": [
         {
-          "taskId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
+          "taskId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
           "type": "workflow_completed",
           "decision": "completed",
           "rationale": "Workflow FCX Runtime Operational Validation completed 4 steps.",
@@ -199,11 +199,11 @@
             "tenantId": "fcx-runtime-validation",
             "taskCount": 4
           },
-          "id": "88e353e5-bb21-4a29-8579-9153bf292409",
-          "timestamp": "2026-06-15T19:25:57.970Z"
+          "id": "2efdaa9a-a6be-421c-9399-9d67103b99f3",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         },
         {
-          "taskId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
+          "taskId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
           "type": "workflow_started",
           "decision": "running",
           "rationale": "Workflow FCX Runtime Operational Validation started in local operational mode.",
@@ -211,11 +211,11 @@
           "metadata": {
             "tenantId": "fcx-runtime-validation"
           },
-          "id": "f13fc7f1-4ebb-4c98-bd54-bf3a09af55dc",
-          "timestamp": "2026-06-15T19:25:57.965Z"
+          "id": "68123021-535a-4235-ad00-17f22afaf3b8",
+          "timestamp": "2026-06-15T19:52:34.948Z"
         },
         {
-          "taskId": "3a286f1a-376b-4d15-b377-37eb72559102",
+          "taskId": "23d2ee4d-660e-4394-a158-a75806781c0b",
           "type": "result_registered",
           "decision": "completed",
           "rationale": "software-architect completed the local runtime workflow step.",
@@ -224,11 +224,11 @@
             "tenantId": "fcx-runtime-validation",
             "evidenceCount": 2
           },
-          "id": "1ba24897-874c-42b9-8751-fdf22c03d364",
-          "timestamp": "2026-06-15T19:25:57.968Z"
+          "id": "f1ff4495-ac81-4c9b-ab33-28d105cb754d",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "3a286f1a-376b-4d15-b377-37eb72559102",
+          "taskId": "23d2ee4d-660e-4394-a158-a75806781c0b",
           "type": "execution_forwarded",
           "decision": "software-architect",
           "rationale": "Task forwarded through local Phase 3 contract; no external execution occurred.",
@@ -237,24 +237,24 @@
             "tenantId": "fcx-runtime-validation",
             "mode": "local-contract"
           },
-          "id": "05aaa298-b4cd-4ce7-b125-688e8522a358",
-          "timestamp": "2026-06-15T19:25:57.968Z"
+          "id": "4b430072-2dc8-4e50-a845-b3cc00bf8dc8",
+          "timestamp": "2026-06-15T19:52:34.949Z"
         },
         {
-          "taskId": "3a286f1a-376b-4d15-b377-37eb72559102",
+          "taskId": "23d2ee4d-660e-4394-a158-a75806781c0b",
           "type": "queue_event",
           "decision": "running",
-          "rationale": "Runtime queue item 6b9f8941-a713-4021-84ea-8864e8863af1 dispatched.",
+          "rationale": "Runtime queue item 35080b7d-245f-49e9-8eea-c6cb00c97d16 dispatched.",
           "actor": "fcx-task-dispatcher",
           "metadata": {
-            "workflowId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
-            "queueId": "6b9f8941-a713-4021-84ea-8864e8863af1"
+            "workflowId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
+            "queueId": "35080b7d-245f-49e9-8eea-c6cb00c97d16"
           },
-          "id": "a27bdd70-0432-47b4-abf3-6cbd40fafaa8",
-          "timestamp": "2026-06-15T19:25:57.967Z"
+          "id": "7f9f411b-58ad-4663-8cb2-02a850d8c349",
+          "timestamp": "2026-06-15T19:52:34.949Z"
         },
         {
-          "taskId": "3a286f1a-376b-4d15-b377-37eb72559102",
+          "taskId": "23d2ee4d-660e-4394-a158-a75806781c0b",
           "type": "task_generated",
           "decision": "software-architect",
           "rationale": "Executable task generated for software-architect.",
@@ -268,11 +268,11 @@
               "risks"
             ]
           },
-          "id": "e0bf5260-008c-41a5-a399-eacb97646354",
-          "timestamp": "2026-06-15T19:25:57.967Z"
+          "id": "7f75b618-6588-4040-96aa-29d1781a2d27",
+          "timestamp": "2026-06-15T19:52:34.949Z"
         },
         {
-          "taskId": "c6452b7d-6171-47f0-9495-fbd70d696697",
+          "taskId": "f3695bc3-4054-496f-92d3-4d58c241939b",
           "type": "result_registered",
           "decision": "completed",
           "rationale": "backend completed the local runtime workflow step.",
@@ -281,11 +281,11 @@
             "tenantId": "fcx-runtime-validation",
             "evidenceCount": 2
           },
-          "id": "be50cf36-27ed-4050-b617-6f8105b635a6",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "dff1e279-3d02-4e17-8c86-8f751212b665",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "c6452b7d-6171-47f0-9495-fbd70d696697",
+          "taskId": "f3695bc3-4054-496f-92d3-4d58c241939b",
           "type": "execution_forwarded",
           "decision": "backend",
           "rationale": "Task forwarded through local Phase 3 contract; no external execution occurred.",
@@ -294,24 +294,24 @@
             "tenantId": "fcx-runtime-validation",
             "mode": "local-contract"
           },
-          "id": "003ea1f9-9658-4fa1-ae24-3f1dbfca0513",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "2825fdc8-ec0f-42e2-8950-c7dd099f80f4",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "c6452b7d-6171-47f0-9495-fbd70d696697",
+          "taskId": "f3695bc3-4054-496f-92d3-4d58c241939b",
           "type": "queue_event",
           "decision": "running",
-          "rationale": "Runtime queue item 19043506-d1fa-4bd8-aa1c-ae0a9c924108 dispatched.",
+          "rationale": "Runtime queue item 574d0a28-7fd9-4b9a-a4a3-86ef07b5e322 dispatched.",
           "actor": "fcx-task-dispatcher",
           "metadata": {
-            "workflowId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
-            "queueId": "19043506-d1fa-4bd8-aa1c-ae0a9c924108"
+            "workflowId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
+            "queueId": "574d0a28-7fd9-4b9a-a4a3-86ef07b5e322"
           },
-          "id": "9dcd51e2-9139-4205-979b-842ea00b0dd4",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "92b330dc-e18e-4e9f-a888-0f48876cfbe2",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "c6452b7d-6171-47f0-9495-fbd70d696697",
+          "taskId": "f3695bc3-4054-496f-92d3-4d58c241939b",
           "type": "task_generated",
           "decision": "backend",
           "rationale": "Executable task generated for backend.",
@@ -325,11 +325,11 @@
               "result"
             ]
           },
-          "id": "0277cafe-5300-4745-8e03-b3c03d21c774",
-          "timestamp": "2026-06-15T19:25:57.968Z"
+          "id": "d4f54177-cd6f-40de-bec6-1d58ba9d626f",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
+          "taskId": "1b8ced33-ed91-4467-9179-e21a096846ea",
           "type": "result_registered",
           "decision": "completed",
           "rationale": "qa completed the local runtime workflow step.",
@@ -338,11 +338,11 @@
             "tenantId": "fcx-runtime-validation",
             "evidenceCount": 2
           },
-          "id": "7dd26a30-f2fa-43d0-9ca5-823df097c6ca",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "4e92ec81-2a19-4198-a7c6-e8e9a5522e4a",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         },
         {
-          "taskId": "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
+          "taskId": "1b8ced33-ed91-4467-9179-e21a096846ea",
           "type": "execution_forwarded",
           "decision": "qa",
           "rationale": "Task forwarded through local Phase 3 contract; no external execution occurred.",
@@ -351,24 +351,24 @@
             "tenantId": "fcx-runtime-validation",
             "mode": "local-contract"
           },
-          "id": "dfb09780-4a1b-4081-8038-b9d5e74d5772",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "56e1e605-e42e-4db4-a888-4b49712e4555",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
+          "taskId": "1b8ced33-ed91-4467-9179-e21a096846ea",
           "type": "queue_event",
           "decision": "running",
-          "rationale": "Runtime queue item 6abf7e4c-97c2-43f6-b4f5-ebd2f82333e8 dispatched.",
+          "rationale": "Runtime queue item f93e3c31-f72b-4826-a225-844289b41e67 dispatched.",
           "actor": "fcx-task-dispatcher",
           "metadata": {
-            "workflowId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
-            "queueId": "6abf7e4c-97c2-43f6-b4f5-ebd2f82333e8"
+            "workflowId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
+            "queueId": "f93e3c31-f72b-4826-a225-844289b41e67"
           },
-          "id": "b8de2aac-5960-4770-9e11-76632de75725",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "d4398773-fd87-4de6-8087-1b2fb5d4ac36",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "760bf0ce-5167-47c8-a951-7a1e725fbeb4",
+          "taskId": "1b8ced33-ed91-4467-9179-e21a096846ea",
           "type": "task_generated",
           "decision": "qa",
           "rationale": "Executable task generated for qa.",
@@ -382,11 +382,11 @@
               "blockers"
             ]
           },
-          "id": "d2c4703d-628f-4d17-a008-4fa476f7453b",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "f77783d1-c02d-4bb1-91fe-e32270c39043",
+          "timestamp": "2026-06-15T19:52:34.950Z"
         },
         {
-          "taskId": "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b",
+          "taskId": "f1a16a74-0726-45d4-b651-3a5bd5c953b4",
           "type": "result_registered",
           "decision": "completed",
           "rationale": "documentation completed the local runtime workflow step.",
@@ -395,11 +395,11 @@
             "tenantId": "fcx-runtime-validation",
             "evidenceCount": 2
           },
-          "id": "29febae2-606f-4239-8730-396806a40197",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "4d988a7a-7261-45e6-9360-1469341f36c4",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         },
         {
-          "taskId": "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b",
+          "taskId": "f1a16a74-0726-45d4-b651-3a5bd5c953b4",
           "type": "execution_forwarded",
           "decision": "documentation",
           "rationale": "Task forwarded through local Phase 3 contract; no external execution occurred.",
@@ -408,24 +408,24 @@
             "tenantId": "fcx-runtime-validation",
             "mode": "local-contract"
           },
-          "id": "03823843-46ea-4836-af7b-ea16d3c08b59",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "d06a7c7d-77a0-4e58-bfff-68ef3bb2b888",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         },
         {
-          "taskId": "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b",
+          "taskId": "f1a16a74-0726-45d4-b651-3a5bd5c953b4",
           "type": "queue_event",
           "decision": "running",
-          "rationale": "Runtime queue item b53842b1-5993-4bab-9de9-e8d27a1061a4 dispatched.",
+          "rationale": "Runtime queue item 76e03a06-804e-423d-af2b-437c175b7de1 dispatched.",
           "actor": "fcx-task-dispatcher",
           "metadata": {
-            "workflowId": "70b3d9f6-dd34-4660-ad14-9d0593908cdb",
-            "queueId": "b53842b1-5993-4bab-9de9-e8d27a1061a4"
+            "workflowId": "ac2cf158-f851-4d52-a4b9-0c1142fc4e02",
+            "queueId": "76e03a06-804e-423d-af2b-437c175b7de1"
           },
-          "id": "8fd65dbc-7a16-49dc-8f82-a89ee96ac740",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "97c86901-511d-4a4f-a8e3-cf6f2ba7e231",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         },
         {
-          "taskId": "e96c2fcb-1f3d-4b5b-8ff4-6c1381d1735b",
+          "taskId": "f1a16a74-0726-45d4-b651-3a5bd5c953b4",
           "type": "task_generated",
           "decision": "documentation",
           "rationale": "Executable task generated for documentation.",
@@ -439,12 +439,12 @@
               "changeSummary"
             ]
           },
-          "id": "0fc9ade0-cb6c-4eb0-adb2-cd41982f6ea3",
-          "timestamp": "2026-06-15T19:25:57.969Z"
+          "id": "a6a206b2-aa3f-4314-bc34-960fd16bf392",
+          "timestamp": "2026-06-15T19:52:34.951Z"
         }
       ],
-      "generatedAt": "2026-06-15T19:25:57.970Z"
+      "generatedAt": "2026-06-15T19:52:34.951Z"
     }
   ],
-  "generatedAt": "2026-06-15T19:25:57.972Z"
+  "generatedAt": "2026-06-15T19:52:34.952Z"
 }

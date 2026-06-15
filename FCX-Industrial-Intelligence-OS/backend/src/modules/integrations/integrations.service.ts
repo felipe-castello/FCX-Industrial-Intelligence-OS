@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FEATURE_FLAGS, isFeatureEnabled, safeModuleFallback } from '../feature-flags';
 
 @Injectable()
 export class IntegrationsService {
-  findAll() {
+  findAll(companyId?: string) {
     return {
       module: 'integrations',
+      companyId: companyId || null,
       status: 'ready',
       connectors: [
         { id: 'mqtt-emqx', name: 'MQTT EMQX', status: 'configured' },
@@ -32,29 +32,14 @@ export class IntegrationsService {
   }
 
   syncExternal(payload: Record<string, unknown>) {
-    if (!isFeatureEnabled(FEATURE_FLAGS.nango)) {
-      return {
-        ...safeModuleFallback('nango', 'ENABLE_NANGO=false'),
-        sync: {
-          status: 'disabled',
-          connector: payload?.connector || 'unknown',
-          supportedConnectors: ['gmail', 'google-drive', 'google-sheets', 'github', 'erp', 'sitrad', 'thingsboard', 'external-api'],
-        },
-      };
-    }
-
-    try {
-      return {
-        module: 'nango',
-        status: 'ready',
-        sync: {
-          status: 'queued',
-          connector: payload?.connector || 'unknown',
-          mode: 'oauth-safe-sync',
-        },
-      };
-    } catch (error) {
-      return safeModuleFallback('nango', error instanceof Error ? error.message : 'unknown error');
-    }
+    return {
+      module: 'external-integration-sync',
+      status: 'disabled',
+      reason: 'External services are not connected in the local operational runtime.',
+      sync: {
+        connector: payload?.connector || 'unknown',
+        mode: 'governed-local-simulation',
+      },
+    };
   }
 }

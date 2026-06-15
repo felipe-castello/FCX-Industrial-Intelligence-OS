@@ -1,23 +1,7 @@
 .env
-.env.*
-!.env.example
-!.env.production.example
+.env.production
 backend/.env
-backend/.env.*
-!backend/.env.example
 frontend/.env
-frontend/.env.*
-!frontend/.env.example
-fcx-6.0/.env
-fcx-6.0/.env.*
-!fcx-6.0/.env.example
-
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-secrets/
 
 node_modules/
 dist/

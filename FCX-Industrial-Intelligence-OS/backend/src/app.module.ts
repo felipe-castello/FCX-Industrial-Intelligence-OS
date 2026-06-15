@@ -13,9 +13,8 @@ import { PredictiveModule } from './modules/predictive/predictive.module';
 import { AcquisitionModule } from './modules/acquisition/acquisition.module';
 import { HealthModule } from './health/health.module';
 import { MetricsModule } from './metrics/metrics.module';
-import { QuantModule } from './modules/quant/quant.module';
-import { KnowledgeModule } from './modules/knowledge/knowledge.module';
-import { ChatModule } from './modules/chat/chat.module';
+import { CompaniesModule } from './modules/companies/companies.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -23,7 +22,9 @@ import { ChatModule } from './modules/chat/chat.module';
     HealthModule,
     MetricsModule,
     DatabaseModule,
+    AuthModule,
     AssetsModule,
+    CompaniesModule,
     TelemetryModule,
     AlarmsModule,
     WorkOrdersModule,
@@ -33,9 +34,6 @@ import { ChatModule } from './modules/chat/chat.module';
     AcquisitionModule,
     IntegrationsModule,
     AgentsModule,
-    QuantModule,
-    KnowledgeModule,
-    ChatModule,
   ],
 })
 export class AppModule {}

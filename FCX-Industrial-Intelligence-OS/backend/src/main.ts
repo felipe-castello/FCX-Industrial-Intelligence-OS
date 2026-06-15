@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import compression from 'compression';
 import helmet from 'helmet';
-import { json, urlencoded, type NextFunction, type Request, type Response } from 'express';
+import { json, NextFunction, Request, Response, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { securityMiddleware } from './security/http-security';
 import { MetricsService } from './metrics/metrics.service';
@@ -40,7 +40,7 @@ async function bootstrap() {
   app.enableCors({
     origin: corsOrigin.split(',').map((origin) => origin.trim()),
     credentials: false,
-    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
   });
   app.use(securityMiddleware);

@@ -3,14 +3,16 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ARG VITE_API_URL=https://api.nexusiotenergy.com.br
+ARG VITE_API_URL=https://api.fcx.local
+ARG VITE_AUTH_ENABLED=true
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_AUTH_ENABLED=$VITE_AUTH_ENABLED
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

@@ -13,8 +13,8 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-if grep -q "replace_with_" "$ENV_FILE"; then
-  echo "Existem placeholders replace_with_ em $ENV_FILE. Ajuste senhas/tokens antes de iniciar."
+if grep -q "CHANGE_ME" "$ENV_FILE"; then
+  echo "Existem placeholders CHANGE_ME em $ENV_FILE. Ajuste senhas/tokens antes de iniciar."
   exit 1
 fi
 

@@ -297,7 +297,7 @@ docker compose -f docker-compose.production.yml --env-file .env.production resta
 ## Checklist antes do Go Live
 
 - Dominios reais configurados no DNS.
-- `.env.production` sem nenhum placeholder `replace_with_`.
+- `.env.production` sem nenhum `CHANGE_ME`.
 - Firewall liberando apenas `22`, `80`, `443` e `1883` se MQTT externo for necessario.
 - SSL emitido e renovacao agendada.
 - Backup PostgreSQL e Redis testados.

@@ -1,185 +1,253 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
-const pick = (items) => items[Math.floor(Math.random() * items.length)];
-const range = (min, max, decimals = 2) => Number((min + Math.random() * (max - min)).toFixed(decimals));
-const hoursAgo = (hours) => new Date(Date.now() - hours * 60 * 60 * 1000);
-
 async function main() {
-  await prisma.alarmEvent.deleteMany();
-  await prisma.telemetryProcessed.deleteMany();
-  await prisma.telemetryRaw.deleteMany();
-  await prisma.alarm.deleteMany();
-  await prisma.workOrder.deleteMany();
-  await prisma.telemetry.deleteMany();
-  await prisma.asset.deleteMany();
-  await prisma.user.deleteMany();
+  const defaultClient = await prisma.client.upsert({
+    where: { cnpj: '00.000.000/0000-00' },
+    update: { name: 'FCX DEFAULT', status: 'ACTIVE' },
+    create: {
+      id: 'fcx-default-client',
+      name: 'FCX DEFAULT',
+      cnpj: '00.000.000/0000-00',
+      email: 'default@fcx.local',
+      phone: '-',
+      address: '-',
+      city: '-',
+      state: '-',
+      status: 'ACTIVE',
+    },
+  });
 
-  const tipos = ['COMPRESSOR', 'RACK', 'COLD_ROOM', 'EVAPORATOR', 'CONDENSER', 'PANEL', 'PUMP', 'FAN'];
-  const fabricantes = ['Bitzer', 'Danfoss', 'Copeland', 'Carel', 'Schneider', 'Siemens', 'WEG'];
-  const unidades = ['Unidade SP-01', 'Unidade SP-02', 'CD Recife', 'CD Curitiba', 'Loja Campinas'];
-  const criticidades = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-  const statuses = ['ONLINE', 'ONLINE', 'ONLINE', 'MAINTENANCE', 'ALARM', 'OFFLINE'];
+  const defaultSite = await prisma.site.upsert({
+    where: { id: 'fcx-default-site' },
+    update: { clientId: defaultClient.id, name: 'LABORATORIO', status: 'ACTIVE' },
+    create: {
+      id: 'fcx-default-site',
+      clientId: defaultClient.id,
+      name: 'LABORATORIO',
+      address: '-',
+      city: '-',
+      state: '-',
+      status: 'ACTIVE',
+    },
+  });
 
-  const assets = [];
-  for (let i = 1; i <= 50; i += 1) {
-    assets.push(
-      await prisma.asset.create({
-        data: {
-          nome: `FCX-${String(i).padStart(3, '0')} ${pick(['Compressor', 'Rack', 'Camara', 'Condensador', 'Bomba'])}`,
-          tipo: pick(tipos),
-          fabricante: pick(fabricantes),
-          modelo: `MVP-${1000 + i}`,
-          unidade: pick(unidades),
-          criticidade: pick(criticidades),
-          status: pick(statuses),
-          createdAt: hoursAgo(range(100, 2000, 0)),
-        },
-      }),
-    );
-  }
+  await prisma.asset.upsert({
+    where: { id: 'fcx-default-asset' },
+    update: { siteId: defaultSite.id, nome: 'GENERICO', unidade: defaultSite.name },
+    create: {
+      id: 'fcx-default-asset',
+      siteId: defaultSite.id,
+      nome: 'GENERICO',
+      tipo: 'OTHER',
+      unidade: defaultSite.name,
+      location: defaultSite.name,
+      status: 'OFFLINE',
+    },
+  });
 
-  const telemetryBatch = [];
-  for (let i = 0; i < 5000; i += 1) {
-    const asset = pick(assets);
-    const temperatura = range(-8, 42);
-    const vibracao = range(0.1, asset.criticidade === 'CRITICAL' ? 8.5 : 4.5);
-    const corrente = range(8, 120);
-    const tensao = range(210, 440);
-    telemetryBatch.push({
-      assetId: asset.id,
-      timestamp: hoursAgo(range(0, 720, 0)),
-      temperatura,
-      vibracao,
-      corrente,
-      tensao,
-      potencia: Number(((corrente * tensao * 1.73 * range(0.72, 0.96)) / 1000).toFixed(2)),
-      pressaoSuccao: range(1.2, 6.5),
-      pressaoDescarga: range(8, 24),
+  const companies = [
+    ['1', 'FCX Demo Company'], ['2', 'Extrabom'], ['3', 'Carone'],
+    ['4', 'Realmar'], ['5', 'Terca Zilli'], ['6', 'Metal Trade'],
+  ];
+  for (const [id, name] of companies) {
+    const index = Number(id);
+    await prisma.company.upsert({
+      where: { id },
+      update: { name, status: 'ACTIVE' },
+      create: {
+        id,
+        name,
+        document: `00.000.00${index}/0001-00`,
+        contactName: `Operacao ${name}`,
+        contactEmail: `operacao@${name.toLowerCase().replaceAll(' ', '-')}.com.br`,
+        contactPhone: '+55 11 4000-5000',
+        status: 'ACTIVE',
+      },
     });
   }
 
-  assets.slice(0, 8).forEach((asset, assetIndex) => {
-    for (let hour = 96; hour >= 1; hour -= 1) {
-      const trend = (96 - hour) / 96;
-      const corrente = range(70, 118);
-      const tensao = range(360, 430);
-      telemetryBatch.push({
-        assetId: asset.id,
-        timestamp: hoursAgo(hour),
-        temperatura: Number((24 + trend * 17 + range(-1.5, 2.2)).toFixed(2)),
-        vibracao: Number((2 + trend * (assetIndex % 2 === 0 ? 6.8 : 3.6) + range(-0.25, 0.55)).toFixed(2)),
-        corrente,
-        tensao,
-        potencia: Number(((corrente * tensao * 1.73 * range(0.82, 0.98)) / 1000).toFixed(2)),
-        pressaoSuccao: range(1.4, 5.8),
-        pressaoDescarga: Number((13 + trend * 9 + range(-1.1, 1.5)).toFixed(2)),
+  const permissions = [
+    ['read', 'Read operational resources'],
+    ['create', 'Create operational resources'],
+    ['update', 'Update operational resources'],
+    ['delete', 'Delete operational resources'],
+    ['*', 'Full platform access'],
+  ];
+  for (const [key, description] of permissions) {
+    await prisma.permission.upsert({ where: { key }, update: { description }, create: { key, description } });
+  }
+
+  const roleDefinitions = {
+    MASTER_ADMIN: ['*'],
+    FCX_ADMIN: ['read', 'create', 'update', 'delete'],
+    SUPERVISOR: ['read', 'create', 'update'],
+    TECHNICIAN: ['read', 'update'],
+    CLIENT: ['read'],
+  };
+  for (const [name, permissionKeys] of Object.entries(roleDefinitions)) {
+    const role = await prisma.role.upsert({
+      where: { name },
+      update: { description: `FCX 5.2 ${name}` },
+      create: { id: `role-${name.toLowerCase().replaceAll('_', '-')}`, name, description: `FCX 5.2 ${name}` },
+    });
+    for (const key of permissionKeys) {
+      const permission = await prisma.permission.findUniqueOrThrow({ where: { key } });
+      await prisma.rolePermission.upsert({
+        where: { roleId_permissionId: { roleId: role.id, permissionId: permission.id } },
+        update: {},
+        create: { roleId: role.id, permissionId: permission.id },
       });
     }
-  });
-  await prisma.telemetry.createMany({ data: telemetryBatch });
+  }
 
-  const acquisitionRawBatch = assets.slice(0, 20).map((asset) => ({
-    assetId: asset.id,
-    source: 'seed-realistic-acquisition',
-    protocol: 'mqtt',
-    topic: `fcx/telemetry/${asset.id}`,
-    payload: {
-      assetId: asset.id,
-      temperatura: range(18, 38),
-      vibracao: range(0.4, 6.8),
-      corrente: range(12, 105),
-      tensao: range(220, 440),
-      potencia: range(8, 82),
-      pressao: range(4, 24),
-      umidade: range(45, 88),
+  const masterRole = await prisma.role.findUniqueOrThrow({ where: { name: 'MASTER_ADMIN' } });
+  const initialAdminPassword = process.env.INITIAL_ADMIN_PASSWORD || 'ChangeMe-FCX-5.2!';
+  const existingAdmin = await prisma.user.findUnique({ where: { email: 'admin@nexusiotenergy.com.br' } });
+  if (existingAdmin) {
+    await prisma.user.update({
+      where: { id: existingAdmin.id },
+      data: {
+        role: 'MASTER_ADMIN',
+        roleId: masterRole.id,
+        status: 'ACTIVE',
+        ...(!existingAdmin.passwordHash ? { passwordHash: await bcrypt.hash(initialAdminPassword, Number(process.env.BCRYPT_ROUNDS || 12)) } : {}),
+      },
+    });
+  } else {
+    await prisma.user.create({
+      data: {
+        companyId: '1',
+        roleId: masterRole.id,
+        nome: 'FCX Master Admin',
+        email: 'admin@nexusiotenergy.com.br',
+        passwordHash: await bcrypt.hash(initialAdminPassword, Number(process.env.BCRYPT_ROUNDS || 12)),
+        role: 'MASTER_ADMIN',
+        status: 'ACTIVE',
+      },
+    });
+  }
+
+  const site = await prisma.site.upsert({
+    where: { id: 'mt100-lab' },
+    update: { companyId: '1', clientId: defaultClient.id, status: 'ACTIVE' },
+    create: {
+      id: 'mt100-lab',
+      companyId: '1',
+      clientId: defaultClient.id,
+      name: 'Loja MT100 Lab',
+      address: 'Sala de Maquinas / Rack 01',
+      city: 'Sao Paulo',
+      state: 'SP',
+      status: 'ACTIVE',
     },
-  }));
-  await prisma.telemetryRaw.createMany({ data: acquisitionRawBatch });
-
-  const acquisitionProcessedBatch = assets.slice(0, 20).map((asset) => ({
-    assetId: asset.id,
-    source: 'seed-realistic-acquisition',
-    timestamp: hoursAgo(range(0, 24, 0)),
-    temperatura: range(18, 38),
-    vibracao: range(0.4, 6.8),
-    corrente: range(12, 105),
-    tensao: range(220, 440),
-    potencia: range(8, 82),
-    pressao: range(4, 24),
-    pressaoSuccao: range(1.8, 6.2),
-    pressaoDescarga: range(8, 24),
-    umidade: range(45, 88),
-    quality: 'GOOD',
-  }));
-  await prisma.telemetryProcessed.createMany({ data: acquisitionProcessedBatch });
-
-  const alarmTitles = [
-    'Temperatura fora da faixa',
-    'Vibracao elevada',
-    'Corrente acima do limite',
-    'Pressao de descarga alta',
-    'Ativo sem comunicacao',
-  ];
-
-  const alarmBatch = [];
-  for (let i = 0; i < 100; i += 1) {
-    const asset = pick(assets);
-    alarmBatch.push({
-      assetId: asset.id,
-      severidade: pick(['INFO', 'WARNING', 'CRITICAL']),
-      titulo: pick(alarmTitles),
-      descricao: `Alarme simulado para validacao operacional do ativo ${asset.nome}.`,
-      timestamp: hoursAgo(range(0, 300, 0)),
-      status: pick(['ACTIVE', 'ACTIVE', 'ACKNOWLEDGED', 'RESOLVED']),
-    });
-  }
-  await prisma.alarm.createMany({ data: alarmBatch });
-
-  await prisma.alarmEvent.createMany({
-    data: assets.slice(0, 10).map((asset) => ({
-      assetId: asset.id,
-      source: 'seed-realistic-acquisition',
-      severidade: pick(['WARNING', 'CRITICAL']),
-      titulo: pick(['Temperatura critica', 'Vibracao critica', 'Potencia elevada', 'Umidade elevada']),
-      descricao: `Evento de aquisicao simulado para validacao do ativo ${asset.nome}.`,
-      metric: pick(['temperatura', 'vibracao', 'potencia', 'umidade']),
-      value: range(35, 95),
-      threshold: range(30, 80),
-      timestamp: hoursAgo(range(0, 48, 0)),
-      status: pick(['ACTIVE', 'ACKNOWLEDGED']),
-    })),
   });
 
-  const workOrderBatch = [];
-  for (let i = 1; i <= 50; i += 1) {
-    const asset = pick(assets);
-    const status = pick(['OPEN', 'IN_PROGRESS', 'WAITING_PARTS', 'CLOSED']);
-    workOrderBatch.push({
-      numeroOs: `OS-${new Date().getFullYear()}-${String(i).padStart(4, '0')}`,
-      assetId: asset.id,
-      tecnico: pick(['Carlos Lima', 'Renata Alves', 'Marcos Silva', 'Ana Ribeiro', 'Equipe FCX']),
-      prioridade: pick(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
-      status,
-      descricao: `Ordem simulada para inspecao, diagnostico e manutencao do ativo ${asset.nome}.`,
-      dataAbertura: hoursAgo(range(24, 600, 0)),
-      dataFechamento: status === 'CLOSED' ? hoursAgo(range(1, 20, 0)) : null,
-    });
-  }
-  await prisma.workOrder.createMany({ data: workOrderBatch });
+  const asset = await prisma.asset.upsert({
+    where: { id: 'mt100' },
+    update: { companyId: '1', siteId: site.id, status: 'ONLINE' },
+    create: {
+      id: 'mt100',
+      companyId: '1',
+      siteId: site.id,
+      nome: 'Rack MT100',
+      tipo: 'RACK',
+      fabricante: 'FCX Demo',
+      modelo: 'MT100',
+      serialNumber: 'MT100-DEMO-001',
+      unidade: site.name,
+      criticidade: 'HIGH',
+      status: 'ONLINE',
+    },
+  });
 
-  await prisma.user.createMany({
+  await prisma.sensor.createMany({
+    skipDuplicates: true,
     data: [
-      { nome: 'Administrador FCX', email: 'admin@fcx.local', role: 'ADMIN' },
-      { nome: 'Gestor Industrial', email: 'gestor@fcx.local', role: 'MANAGER' },
-      { nome: 'Engenharia FCX', email: 'engenharia@fcx.local', role: 'ENGINEER' },
-      { nome: 'Tecnico Campo', email: 'tecnico@fcx.local', role: 'TECHNICIAN' },
-      { nome: 'Visualizador Operacao', email: 'viewer@fcx.local', role: 'VIEWER' },
+      {
+        id: 'sensor-mt100-temperature',
+        assetId: asset.id,
+        name: 'Sensor de temperatura MT100',
+        type: 'temperature',
+        unit: 'C',
+        protocol: 'MQTT',
+        mqttTopic: 'fcx/telemetry/mt100/temperature',
+        status: 'ONLINE',
+      },
+      {
+        id: 'sensor-mt100-vibration',
+        assetId: asset.id,
+        name: 'Sensor de vibracao MT100',
+        type: 'vibration',
+        unit: 'mm/s',
+        protocol: 'MQTT',
+        mqttTopic: 'fcx/telemetry/mt100/vibration',
+        status: 'ONLINE',
+      },
     ],
   });
 
-  console.log('Seed concluido: 50 ativos, 5000+ telemetrias, dados de aquisicao, 100 alarmes, 50 ordens de servico e 5 usuarios.');
+  await prisma.gateway.upsert({
+    where: { id: 'gateway-mqtt-mt100' },
+    update: { siteId: site.id, status: 'ONLINE' },
+    create: {
+      id: 'gateway-mqtt-mt100',
+      siteId: site.id,
+      name: 'Gateway MQTT MT100',
+      model: 'FCX Edge 100',
+      ipAddress: '192.168.10.100',
+      protocol: 'MQTT',
+      status: 'ONLINE',
+    },
+  });
+
+  const telemetry = {
+    assetId: asset.id,
+    companyId: '1',
+    clientId: defaultClient.id,
+    siteId: site.id,
+    temperatura: 32.4,
+    vibracao: 1.82,
+    corrente: 38.6,
+    tensao: 380,
+    potencia: 21.7,
+    pressaoSuccao: 3.2,
+    pressaoDescarga: 14.8,
+  };
+  if (!(await prisma.telemetry.findFirst({ where: { assetId: asset.id } }))) {
+    await prisma.telemetry.create({ data: telemetry });
+  }
+  if (!(await prisma.telemetryRaw.findFirst({ where: { assetId: asset.id, source: 'fcx-demo-seed' } }))) {
+    await prisma.telemetryRaw.create({
+      data: {
+        assetId: asset.id,
+        source: 'fcx-demo-seed',
+        protocol: 'MQTT',
+        topic: 'fcx/telemetry/mt100',
+        payload: { temperature: telemetry.temperatura, vibration: telemetry.vibracao },
+      },
+    });
+  }
+  if (!(await prisma.telemetryProcessed.findFirst({ where: { assetId: asset.id, source: 'fcx-demo-seed' } }))) {
+    await prisma.telemetryProcessed.create({
+      data: {
+        assetId: asset.id,
+        source: 'fcx-demo-seed',
+        temperatura: telemetry.temperatura,
+        vibracao: telemetry.vibracao,
+        corrente: telemetry.corrente,
+        tensao: telemetry.tensao,
+        potencia: telemetry.potencia,
+        pressaoSuccao: telemetry.pressaoSuccao,
+        pressaoDescarga: telemetry.pressaoDescarga,
+        quality: 'GOOD',
+      },
+    });
+  }
+
+  console.log('Seed idempotente concluido sem remover dados existentes.');
 }
 
 main()

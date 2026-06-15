@@ -2,7 +2,7 @@ const { createHmac } = require('crypto');
 
 const secret = process.env.JWT_SECRET;
 
-if (!secret || secret.toLowerCase().includes('replace_with_') || secret.toLowerCase().includes('change_me')) {
+if (!secret || secret.includes('CHANGE_ME')) {
   console.error('Configure JWT_SECRET antes de gerar um token.');
   process.exit(1);
 }

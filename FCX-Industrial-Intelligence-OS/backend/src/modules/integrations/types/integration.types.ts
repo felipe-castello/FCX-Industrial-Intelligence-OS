@@ -2,6 +2,10 @@ export type IntegrationSource = 'mqtt-emqx' | 'modbus-tcp' | 'carel-boss' | 'sit
 
 export type IndustrialTelemetryPayload = {
   assetId?: string;
+  companyId?: string;
+  clientId?: string;
+  siteId?: string;
+  deviceId?: string;
   externalId?: string;
   timestamp?: string | Date;
   temperatura?: number;

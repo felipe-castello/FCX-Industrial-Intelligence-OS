@@ -42,7 +42,10 @@ services:
       MQTT_URL: ${MQTT_URL:-mqtt://emqx:1883}
       MQTT_TELEMETRY_TOPIC: ${MQTT_TELEMETRY_TOPIC:-fcx/telemetry/+}
       JWT_SECRET: ${JWT_SECRET:-change_me}
-      RUN_SEED: ${RUN_SEED:-true}
+      SECURITY_AUTH_ENABLED: ${SECURITY_AUTH_ENABLED:-true}
+      SECURITY_RBAC_ENABLED: ${SECURITY_RBAC_ENABLED:-true}
+      RUN_SEED: ${RUN_SEED:-false}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://app.nexusiotenergy.com.br}
     ports:
       - "${API_PORT:-3000}:3000"
     depends_on:
@@ -61,7 +64,8 @@ services:
       dockerfile: Dockerfile
     container_name: fcx-frontend
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_API_URL: https://api.nexusiotenergy.com.br
+      VITE_AUTH_ENABLED: ${VITE_AUTH_ENABLED:-true}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
@@ -81,7 +85,7 @@ services:
     command: ["node", "scripts/mqtt-simulator.js"]
     environment:
       MQTT_URL: ${MQTT_URL:-mqtt://emqx:1883}
-      API_URL: http://backend:3000
+      API_URL: https://api.nexusiotenergy.com.br
       MQTT_SIMULATOR_TOPIC_PREFIX: ${MQTT_SIMULATOR_TOPIC_PREFIX:-fcx/telemetry}
       MQTT_SIMULATOR_INTERVAL_MS: 5000
     depends_on:

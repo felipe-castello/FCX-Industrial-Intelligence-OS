@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { IntegrationsApiController } from './integrations-api.controller';
 import { IntegrationsController } from './integrations.controller';
 import { IntegrationsService } from './integrations.service';
 import { AlarmEngineService } from './services/alarm-engine.service';
@@ -14,7 +13,7 @@ import { TelemetryProcessingService } from './services/telemetry-processing.serv
 import { ThingsBoardService } from './services/thingsboard.service';
 
 @Module({
-  controllers: [IntegrationsController, IntegrationsApiController],
+  controllers: [IntegrationsController],
   providers: [
     IntegrationsService,
     DataIngestionService,
