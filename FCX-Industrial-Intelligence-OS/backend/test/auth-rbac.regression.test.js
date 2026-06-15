@@ -9,10 +9,16 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 test('authentication remains optional and auth endpoints stay public', () => {
   const security = read('src/security/http-security.ts');
   assert.match(security, /SECURITY_AUTH_ENABLED \|\| 'false'/);
-  assert.match(security, /path\.startsWith\('\/auth\/'\)/);
-  assert.match(security, /path === '\/health' \|\| path === '\/metrics'/);
+  assert.match(security, /const requestPath = request\.path \|\| request\.originalUrl \|\| '\/'/);
+  assert.doesNotMatch(security, /request\.url/);
+  for (const publicPath of ['/api/auth/login', '/auth/login', '/api/auth/refresh', '/auth/refresh', '/api/health', '/health']) {
+    assert.ok(security.includes(`'${publicPath}'`), `missing public security path ${publicPath}`);
+  }
+  assert.match(security, /publicPaths\.has\(requestPath\)/);
+  assert.match(security, /requestPath\.startsWith\('\/auth\/'\) \|\| requestPath\.startsWith\('\/api\/auth\/'\)/);
   assert.match(security, /return !\['HEAD', 'OPTIONS'\]\.includes\(method\)/);
   assert.match(security, /SECURITY_RBAC_ENABLED \|\| 'false'/);
+  assert.match(security, /replace\(\/\^\\\/api\(\?=\\\/\)\/, ''\)/);
 });
 
 test('FCX 5.2 exposes complete authentication lifecycle', () => {
