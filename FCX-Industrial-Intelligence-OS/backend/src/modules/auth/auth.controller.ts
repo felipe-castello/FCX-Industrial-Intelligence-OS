@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { ForgotPasswordDto, LoginDto, RefreshTokenDto, ResetPasswordDto } from './dto/auth.dto';
 import { PrismaService } from '../../database/prisma.service';
 
-@Controller('auth')
+@Controller(['auth', 'api/auth'])
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
   @Post('login') login(@Body() data: LoginDto, @Ip() ip: string) { return this.auth.login(data.email, data.password, ip); }

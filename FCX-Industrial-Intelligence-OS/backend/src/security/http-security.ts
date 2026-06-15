@@ -27,18 +27,16 @@ type JwtPayload = { sub?: string; role?: string; companyId?: string; permissions
 
 const publicPaths = new Set([
   '/health',
-  '/api/health',
   '/metrics',
-  '/api/metrics',
   '/auth/login',
-  '/api/auth/login',
   '/auth/refresh',
-  '/api/auth/refresh',
 ]);
 
 const requestPathOf = (request: IncomingRequest) => {
   const requestPath = request.path || request.originalUrl || '/';
-  return requestPath.split('?')[0];
+  const pathWithOriginalUrl = requestPath === '/' && request.originalUrl ? request.originalUrl : requestPath;
+  const pathWithoutQuery = pathWithOriginalUrl.split('?')[0] || '/';
+  return pathWithoutQuery.replace(/^\/api(?=\/|$)/, '') || '/';
 };
 
 const verifyJwtHs256 = (token: string, secret: string): JwtPayload | null => {
@@ -85,7 +83,7 @@ const isProtectedRequest = (request: IncomingRequest) => {
     return false;
   }
 
-  if (requestPath.startsWith('/auth/') || requestPath.startsWith('/api/auth/')) {
+  if (requestPath.startsWith('/auth/')) {
     return false;
   }
 
@@ -108,7 +106,7 @@ const actionFor = (method = 'GET') => ({ POST: 'create', PUT: 'update', PATCH: '
 
 const canAccess = (request: IncomingRequest, payload: JwtPayload) => {
   if ((process.env.SECURITY_RBAC_ENABLED || 'false') !== 'true') return true;
-  const path = requestPathOf(request).replace(/^\/api(?=\/)/, '');
+  const path = requestPathOf(request);
   if (path.startsWith('/roles') || path.startsWith('/permissions') || path.startsWith('/audit-logs')) {
     return ['MASTER_ADMIN', 'FCX_ADMIN', 'ADMIN'].includes(payload.role || '');
   }

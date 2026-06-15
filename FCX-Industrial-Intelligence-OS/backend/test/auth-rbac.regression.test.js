@@ -1,28 +1,71 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const Module = require('node:module');
 const path = require('node:path');
 const test = require('node:test');
+const typescript = require('typescript');
 
 const root = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const loadSecurityMiddleware = () => {
+  const filename = path.join(root, 'src/security/http-security.ts');
+  const output = typescript.transpileModule(read('src/security/http-security.ts'), {
+    compilerOptions: { esModuleInterop: true, module: typescript.ModuleKind.CommonJS, target: typescript.ScriptTarget.ES2022 },
+  }).outputText;
+  const securityModule = new Module(filename, module);
+  securityModule.filename = filename;
+  securityModule.paths = Module._nodeModulePaths(path.dirname(filename));
+  securityModule._compile(output, filename);
+  return securityModule.exports.securityMiddleware;
+};
+
+const assertPublicRequest = (method, originalUrl) => {
+  const securityMiddleware = loadSecurityMiddleware();
+  const previousAuth = process.env.SECURITY_AUTH_ENABLED;
+  const previousSecret = process.env.JWT_SECRET;
+  let nextCalled = false;
+  let responseStatus;
+
+  process.env.SECURITY_AUTH_ENABLED = 'true';
+  process.env.JWT_SECRET = 'regression-test-secret';
+  securityMiddleware(
+    { method, path: '/', originalUrl, headers: {} },
+    { status: (code) => ({ json: () => { responseStatus = code; } }) },
+    () => { nextCalled = true; },
+  );
+  if (previousAuth === undefined) delete process.env.SECURITY_AUTH_ENABLED; else process.env.SECURITY_AUTH_ENABLED = previousAuth;
+  if (previousSecret === undefined) delete process.env.JWT_SECRET; else process.env.JWT_SECRET = previousSecret;
+
+  assert.equal(nextCalled, true, `${method} ${originalUrl} must reach its controller`);
+  assert.equal(responseStatus, undefined, `${method} ${originalUrl} must not be rejected by security middleware`);
+};
 
 test('authentication remains optional and auth endpoints stay public', () => {
   const security = read('src/security/http-security.ts');
   assert.match(security, /SECURITY_AUTH_ENABLED \|\| 'false'/);
   assert.match(security, /const requestPath = request\.path \|\| request\.originalUrl \|\| '\/'/);
   assert.doesNotMatch(security, /request\.url/);
-  for (const publicPath of ['/api/auth/login', '/auth/login', '/api/auth/refresh', '/auth/refresh', '/api/health', '/health']) {
-    assert.ok(security.includes(`'${publicPath}'`), `missing public security path ${publicPath}`);
-  }
+  for (const publicPath of ['/auth/login', '/auth/refresh', '/health']) assert.ok(security.includes(`'${publicPath}'`), `missing normalized public security path ${publicPath}`);
+  assert.match(security, /requestPath === '\/' && request\.originalUrl/);
+  assert.match(security, /replace\(\/\^\\\/api\(\?=\\\/\|\$\)\/, ''\)/);
   assert.match(security, /publicPaths\.has\(requestPath\)/);
-  assert.match(security, /requestPath\.startsWith\('\/auth\/'\) \|\| requestPath\.startsWith\('\/api\/auth\/'\)/);
+  assert.match(security, /requestPath\.startsWith\('\/auth\/'\)/);
   assert.match(security, /return !\['HEAD', 'OPTIONS'\]\.includes\(method\)/);
   assert.match(security, /SECURITY_RBAC_ENABLED \|\| 'false'/);
-  assert.match(security, /replace\(\/\^\\\/api\(\?=\\\/\)\/, ''\)/);
+});
+
+test('public health and login routes bypass security middleware with or without api prefix', () => {
+  assertPublicRequest('GET', '/api/health?probe=1');
+  assertPublicRequest('GET', '/health');
+  assertPublicRequest('POST', '/api/auth/login');
+  assertPublicRequest('POST', '/auth/login');
 });
 
 test('FCX 5.2 exposes complete authentication lifecycle', () => {
   const controller = read('src/modules/auth/auth.controller.ts');
+  const healthController = read('src/health/health.controller.ts');
+  assert.match(controller, /@Controller\(\['auth', 'api\/auth'\]\)/);
+  assert.match(healthController, /@Controller\(\['health', 'api\/health'\]\)/);
   for (const route of ["@Post('login')", "@Post('refresh')", "@Post('logout')", "@Post('forgot-password')", "@Post('reset-password')"]) {
     assert.ok(controller.includes(route), `missing ${route}`);
   }
