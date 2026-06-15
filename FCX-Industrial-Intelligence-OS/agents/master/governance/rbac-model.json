@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "scope": "tenant",
+  "identitySource": "verified-authentication-claims",
+  "rules": [
+    "Deny by default.",
+    "Never accept actor or reviewer identity from request payloads.",
+    "Every authorization decision must include tenantId, userId, roles, permission, resource, and result.",
+    "Cross-tenant access requires platform_admin and an audited break-glass event."
+  ],
+  "roles": {
+    "platform_admin": ["tenant.manage", "governance.read", "audit.read", "policy.manage"],
+    "tenant_admin": ["task.create", "task.read", "decision.read", "approval.read", "user.manage"],
+    "requester": ["task.create", "task.read.own"],
+    "qa_reviewer": ["task.read", "decision.read", "approval.qa.review"],
+    "human_approver": ["task.read", "decision.read", "approval.human.review"],
+    "devops_approver": ["task.read", "decision.read", "approval.deployment.review"],
+    "auditor": ["governance.read", "audit.read", "metrics.read"]
+  },
+  "separationOfDuties": [
+    "Requester cannot approve the same task.",
+    "QA reviewer cannot provide human approval for the same task.",
+    "Human approver cannot provide deployment approval for the same task.",
+    "Critical-task approvals require distinct verified users."
+  ]
+}

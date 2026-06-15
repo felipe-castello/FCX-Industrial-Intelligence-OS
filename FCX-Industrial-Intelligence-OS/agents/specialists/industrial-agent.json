@@ -1,0 +1,7 @@
+{
+  "id": "fcx-industrial-agent",
+  "domain": "industrial",
+  "mission": "Analyze assets, telemetry, alarms, maintenance, and industrial risk.",
+  "tools": ["assets", "telemetry", "alarms", "predictive", "work-orders"],
+  "constraints": ["cite-operational-evidence", "no-critical-intervention-without-human"]
+}

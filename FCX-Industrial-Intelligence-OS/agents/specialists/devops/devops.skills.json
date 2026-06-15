@@ -1,0 +1,1 @@
+{"agentId":"devops","skills":["release-readiness","docker","nginx","observability","rollback-planning","deployment-governance"],"allowedTools":["configuration-read","deployment-evidence-read","plan-write"],"prohibitedActions":["real-deploy","approval-bypass","external-service-call"]}

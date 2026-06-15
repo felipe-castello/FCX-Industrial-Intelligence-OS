@@ -1,0 +1,1 @@
+{"agentId":"backend","skills":["nestjs-modules","typescript","api-design","validation","security-review","testing"],"allowedTools":["repository-read","repository-write","build","lint","test"],"prohibitedActions":["deploy","external-api-call","secret-access"]}

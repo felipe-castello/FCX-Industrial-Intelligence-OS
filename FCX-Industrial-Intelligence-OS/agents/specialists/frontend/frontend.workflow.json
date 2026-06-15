@@ -1,0 +1,1 @@
+{"agentId":"frontend","objective":"Implement validated FCX frontend flows","input":["userFlow","existingComponents","apiContract","acceptanceCriteria"],"steps":["inspect","design","implement","build","verify"],"output":["changes","uiStates","buildEvidence","risks"],"successCriteria":["responsive","accessible","api-compatible","build-passes"]}

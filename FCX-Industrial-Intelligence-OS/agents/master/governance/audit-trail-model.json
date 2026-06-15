@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "storage": "postgresql-append-only",
+  "requiredFields": [
+    "eventId",
+    "tenantId",
+    "actorType",
+    "actorId",
+    "action",
+    "resourceType",
+    "resourceId",
+    "result",
+    "reason",
+    "correlationId",
+    "createdAt",
+    "previousHash",
+    "eventHash"
+  ],
+  "eventFamilies": ["authorization", "task", "routing", "decision", "approval", "deployment", "policy", "security"],
+  "rules": [
+    "Audit events are append-only.",
+    "Secrets, full prompts, tokens, and unrestricted payloads are prohibited.",
+    "Every approval and deployment transition emits an audit event.",
+    "Retention and export policy are tenant-aware."
+  ]
+}

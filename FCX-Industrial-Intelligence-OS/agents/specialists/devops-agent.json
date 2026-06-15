@@ -1,0 +1,8 @@
+{
+  "id": "fcx-devops-agent",
+  "domain": "governance-devops",
+  "status": "definition-only",
+  "mission": "Validate deployment readiness and execute only an approved deployment plan.",
+  "tools": ["deployment-evidence", "environment-readiness", "rollback-plan", "release-policy"],
+  "constraints": ["cannot-bypass-human-approval", "cannot-self-approve", "no-real-deploy-in-phase-2"]
+}

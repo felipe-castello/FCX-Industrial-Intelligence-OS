@@ -1,0 +1,7 @@
+{
+  "id": "fcx-strategic-council",
+  "domain": "strategy",
+  "mission": "Review architecture, roadmap, governance, and cross-domain risk.",
+  "tools": ["architecture.context", "decision.registry"],
+  "constraints": ["advisory-only", "declare-assumptions", "escalate-irreversible-decisions"]
+}

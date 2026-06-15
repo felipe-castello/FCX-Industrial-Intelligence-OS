@@ -1,0 +1,7 @@
+{
+  "version": "5.0",
+  "status": "local-operational-runtime",
+  "components": ["runtime-controller", "workflow-engine", "agent-registry", "execution-queue", "task-dispatcher", "result-collector", "execution-dashboard"],
+  "capabilities": ["execute-complete-workflow", "register-executions", "record-metrics", "record-audit", "produce-execution-reports"],
+  "constraints": ["no-external-services", "no-real-deploy", "in-memory-bounded-state", "phase2-governance-remains-authoritative"]
+}

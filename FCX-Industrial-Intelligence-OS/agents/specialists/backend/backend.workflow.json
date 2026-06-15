@@ -1,0 +1,1 @@
+{"agentId":"backend","objective":"Implement validated FCX backend changes","input":["task","relevantFiles","apiContracts","acceptanceCriteria"],"steps":["inspect","plan","implement","test","report"],"output":["changes","testEvidence","risks","result"],"successCriteria":["build-passes","lint-passes","tests-pass","contracts-preserved"]}

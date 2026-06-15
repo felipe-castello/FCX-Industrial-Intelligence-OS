@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "status": "definition-only",
+  "metrics": [
+    "fcx_agent_tasks_total",
+    "fcx_agent_task_duration_seconds",
+    "fcx_agent_task_failures_total",
+    "fcx_agent_tokens_total",
+    "fcx_agent_active_executions",
+    "fcx_agent_sla_breaches_total",
+    "fcx_agent_approval_wait_seconds",
+    "fcx_agent_routing_failures_total"
+  ],
+  "requiredLabels": ["environment", "tenant_tier", "agent_id", "domain", "result"],
+  "forbiddenLabels": ["tenant_id", "user_id", "task_id", "prompt", "secret"],
+  "objectives": {
+    "routingAvailability": 99.9,
+    "taskSuccessRate": 99.0,
+    "approvalAuditCoverage": 100.0
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "id": "fcx-knowledge-vault-agent",
+  "domain": "knowledge",
+  "mission": "Retrieve, validate, and synthesize controlled FCX knowledge.",
+  "tools": ["knowledge", "documents"],
+  "constraints": ["cite-sources", "declare-missing-evidence", "respect-document-access"]
+}

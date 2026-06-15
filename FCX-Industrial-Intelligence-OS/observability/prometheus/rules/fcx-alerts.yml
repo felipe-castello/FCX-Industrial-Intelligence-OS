@@ -1,0 +1,112 @@
+groups:
+  - name: fcx-platform
+    rules:
+      - alert: FCXApiDown
+        expr: up{job="fcx-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "FCX API indisponivel"
+          description: "Prometheus nao consegue coletar /metrics do backend."
+
+      - alert: FCXHighApiErrorRate
+        expr: sum(rate(fcx_api_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum(rate(fcx_api_http_requests_total[5m])), 1) > 0.05
+        for: 5m
+        labels:
+          severity: high
+          service: backend
+        annotations:
+          summary: "Taxa de erro HTTP alta"
+          description: "Mais de 5% das respostas da API sao 5xx nos ultimos 5 minutos."
+
+      - alert: FCXHighCpuUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: high
+          service: host
+        annotations:
+          summary: "CPU alta na VPS"
+          description: "Uso de CPU acima de 85% por 10 minutos."
+
+      - alert: FCXHighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: high
+          service: host
+        annotations:
+          summary: "RAM alta na VPS"
+          description: "Uso de memoria acima de 85% por 10 minutos."
+
+      - alert: FCXDiskSpaceLow
+        expr: (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"})) * 100 > 85
+        for: 10m
+        labels:
+          severity: critical
+          service: host
+        annotations:
+          summary: "Disco proximo do limite"
+          description: "Filesystem acima de 85% de uso."
+
+      - alert: FCXPostgresDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL indisponivel"
+          description: "Exporter nao consegue conectar ao PostgreSQL."
+
+      - alert: FCXPostgresTooManyConnections
+        expr: sum(pg_stat_activity_count) > 80
+        for: 5m
+        labels:
+          severity: high
+          service: postgres
+        annotations:
+          summary: "Muitas conexoes PostgreSQL"
+          description: "PostgreSQL com volume elevado de conexoes ativas."
+
+      - alert: FCXRedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis indisponivel"
+          description: "Exporter nao consegue conectar ao Redis."
+
+      - alert: FCXRedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 10m
+        labels:
+          severity: high
+          service: redis
+        annotations:
+          summary: "Redis usando muita memoria"
+          description: "Redis acima de 85% do limite configurado."
+
+      - alert: FCXMQTTDown
+        expr: up{job="emqx"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: mqtt
+        annotations:
+          summary: "EMQX/MQTT indisponivel"
+          description: "Prometheus nao consegue coletar metricas do EMQX."
+
+      - alert: FCXContainerRestarting
+        expr: changes(container_start_time_seconds{name=~".*fcx-production-.+"}[15m]) > 1
+        for: 1m
+        labels:
+          severity: medium
+          service: docker
+        annotations:
+          summary: "Container reiniciando"
+          description: "Um container FCX reiniciou mais de uma vez nos ultimos 15 minutos."

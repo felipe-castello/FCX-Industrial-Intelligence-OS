@@ -1,0 +1,1 @@
+{"agentId":"documentation","objective":"Maintain accurate FCX documentation","input":["change","audience","affectedFiles","decisions","acceptanceCriteria"],"steps":["inspect","identify-gaps","write","link","verify"],"output":["updatedDocumentation","links","gaps","changeSummary"],"successCriteria":["accurate","navigable","artifact-linked","no-invented-behavior"]}

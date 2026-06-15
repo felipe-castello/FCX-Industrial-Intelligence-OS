@@ -1,0 +1,1 @@
+{"agentId":"software-architect","skills":["architecture-review","module-boundary-analysis","impact-analysis","adr-authoring","risk-assessment"],"allowedTools":["repository-read","documentation-read"],"prohibitedActions":["deploy","external-api-call","unapproved-breaking-change"]}

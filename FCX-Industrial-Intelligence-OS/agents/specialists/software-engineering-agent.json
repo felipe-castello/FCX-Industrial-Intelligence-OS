@@ -1,0 +1,7 @@
+{
+  "id": "fcx-software-engineering-agent",
+  "domain": "engineering",
+  "mission": "Implement and validate scoped changes inside the existing FCX repository.",
+  "tools": ["repository", "build", "lint", "test"],
+  "constraints": ["preserve-existing-code", "follow-local-patterns", "validate-before-qa", "no-deployment-without-approval"]
+}

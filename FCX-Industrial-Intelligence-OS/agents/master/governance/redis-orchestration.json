@@ -1,0 +1,32 @@
+{
+  "version": "2.0",
+  "status": "architecture-only",
+  "keyPrefix": "fcx:v2:{tenantId}",
+  "queues": {
+    "tasks": "stream:tasks",
+    "agentRouting": "stream:agent-routing",
+    "events": "stream:events",
+    "deadLetter": "stream:dead-letter"
+  },
+  "consumerGroups": ["master-agents", "specialist-agents", "qa-agents", "devops-agents"],
+  "locks": {
+    "taskExecution": "lock:task:{taskId}",
+    "approvalTransition": "lock:approval:{taskId}",
+    "ttlSeconds": 30,
+    "renewalRequired": true
+  },
+  "executionControl": {
+    "stateKey": "execution:{taskId}",
+    "idempotencyKey": "idempotency:{operationId}",
+    "heartbeatKey": "heartbeat:{agentId}:{executionId}",
+    "maxRetries": 3,
+    "visibilityTimeoutSeconds": 300,
+    "deadLetterAfterRetries": true
+  },
+  "rules": [
+    "Redis is not the audit source of truth.",
+    "PostgreSQL remains authoritative for tasks, decisions, approvals, and audit logs.",
+    "Every key includes tenantId.",
+    "Do not store prompts, secrets, or sensitive evidence in Redis."
+  ]
+}

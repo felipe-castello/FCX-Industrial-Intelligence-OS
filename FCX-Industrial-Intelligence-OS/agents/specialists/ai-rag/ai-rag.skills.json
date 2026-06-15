@@ -1,0 +1,1 @@
+{"agentId":"ai-rag","skills":["rag-architecture","retrieval-design","prompt-engineering","evaluation","hallucination-control","token-budgeting"],"allowedTools":["knowledge-read","documentation-read","evaluation-design"],"prohibitedActions":["external-api-call","cross-tenant-retrieval","uncited-claim"]}

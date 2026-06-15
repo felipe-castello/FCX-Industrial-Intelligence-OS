@@ -1,0 +1,78 @@
+{
+  "id": null,
+  "uid": "fcx-operations-overview",
+  "title": "FCX Operations Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "tags": ["fcx", "sre", "operations"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "API Up",
+      "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+      "targets": [{"expr": "fcx_api_up", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "stat",
+      "title": "HTTP 5xx Rate",
+      "gridPos": {"x": 4, "y": 0, "w": 5, "h": 4},
+      "targets": [{"expr": "sum(rate(fcx_api_http_requests_total{status=~\"5..\"}[5m]))", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "stat",
+      "title": "CPU VPS",
+      "gridPos": {"x": 9, "y": 0, "w": 5, "h": 4},
+      "targets": [{"expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}
+    },
+    {
+      "type": "stat",
+      "title": "RAM VPS",
+      "gridPos": {"x": 14, "y": 0, "w": 5, "h": 4},
+      "targets": [{"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percent"}, "overrides": []}
+    },
+    {
+      "type": "stat",
+      "title": "Targets Down",
+      "gridPos": {"x": 19, "y": 0, "w": 5, "h": 4},
+      "targets": [{"expr": "count(up == 0)", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "timeseries",
+      "title": "API Requests by Status",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "sum by(status) (rate(fcx_api_http_requests_total[5m]))", "legendFormat": "{{status}}", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "timeseries",
+      "title": "Container CPU",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "targets": [{"expr": "sum by(name) (rate(container_cpu_usage_seconds_total{name=~\".*fcx-production-.+\"}[5m]))", "legendFormat": "{{name}}", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"}
+    },
+    {
+      "type": "timeseries",
+      "title": "Container Memory",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "targets": [{"expr": "container_memory_usage_bytes{name=~\".*fcx-production-.+\"}", "legendFormat": "{{name}}", "refId": "A"}],
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": []}
+    },
+    {
+      "type": "logs",
+      "title": "Production Logs",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "targets": [{"expr": "{container=~\"fcx-production-.+\"}", "refId": "A"}],
+      "datasource": {"type": "loki", "uid": "Loki"}
+    }
+  ]
+}

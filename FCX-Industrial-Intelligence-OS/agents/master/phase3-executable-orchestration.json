@@ -1,0 +1,14 @@
+{
+  "version": "3.0",
+  "status": "local-contract-executable",
+  "capabilities": ["select-agent", "generate-task", "forward-execution", "register-result"],
+  "specialists": ["software-architect", "backend", "frontend", "database", "iot-mqtt", "ai-rag", "qa", "devops", "documentation"],
+  "executionMode": "local-contract",
+  "rules": [
+    "No external API calls.",
+    "No real infrastructure operations.",
+    "Every generated task and result is decision-logged.",
+    "A result can only be registered after a task is forwarded.",
+    "Governance approval gates remain authoritative."
+  ]
+}

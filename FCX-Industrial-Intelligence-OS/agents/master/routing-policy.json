@@ -1,0 +1,18 @@
+{
+  "domains": {
+    "engineering": "fcx-software-engineering-agent",
+    "strategy": "fcx-strategic-council",
+    "industrial": "fcx-industrial-agent",
+    "trade": "fcx-trade-intelligence-agent",
+    "sports": "fcx-sports-quant-agent",
+    "electronics": "fcx-electronics-lab-agent",
+    "knowledge": "fcx-knowledge-vault-agent"
+  },
+  "riskGates": {
+    "low": ["qa"],
+    "medium": ["qa"],
+    "high": ["qa", "deployment"],
+    "critical": ["qa", "deployment", "human"]
+  },
+  "fallbackDomain": "strategy"
+}

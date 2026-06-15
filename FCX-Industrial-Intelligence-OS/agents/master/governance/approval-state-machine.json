@@ -1,0 +1,41 @@
+{
+  "version": "2.0",
+  "initialState": "requested",
+  "terminalStates": ["completed", "rejected", "cancelled", "deployment_failed"],
+  "states": [
+    "requested",
+    "routed",
+    "executing",
+    "qa_pending",
+    "qa_approved",
+    "human_pending",
+    "human_approved",
+    "deployment_pending",
+    "deployment_approved",
+    "deploying",
+    "completed",
+    "rejected",
+    "cancelled",
+    "deployment_failed"
+  ],
+  "mandatoryDeployPath": [
+    "requested",
+    "routed",
+    "executing",
+    "qa_pending",
+    "qa_approved",
+    "human_pending",
+    "human_approved",
+    "deployment_pending",
+    "deployment_approved",
+    "deploying",
+    "completed"
+  ],
+  "invariants": [
+    "No deployment approval without QA approval and registered human approval.",
+    "Critical tasks always require human approval.",
+    "Any rejected prerequisite invalidates downstream approvals.",
+    "Terminal states cannot transition without an audited administrative recovery event.",
+    "Every transition requires tenant scope, actor identity, permission, reason, and idempotency key."
+  ]
+}

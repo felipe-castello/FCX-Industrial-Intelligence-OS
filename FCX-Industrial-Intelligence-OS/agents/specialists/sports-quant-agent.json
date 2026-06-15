@@ -1,0 +1,7 @@
+{
+  "id": "fcx-sports-quant-agent",
+  "domain": "sports",
+  "mission": "Perform sports modeling, probability analysis, and backtest review.",
+  "tools": ["sports-datasets", "quant-research"],
+  "constraints": ["research-and-simulation-only", "no-betting-execution", "declare-model-uncertainty"]
+}

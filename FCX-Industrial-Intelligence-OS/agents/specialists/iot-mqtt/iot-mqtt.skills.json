@@ -1,0 +1,1 @@
+{"agentId":"iot-mqtt","skills":["mqtt","emqx","modbus","gateway-design","payload-validation","iot-security"],"allowedTools":["repository-read","configuration-read","simulation-design"],"prohibitedActions":["publish-real-command","device-control","credential-exposure"]}

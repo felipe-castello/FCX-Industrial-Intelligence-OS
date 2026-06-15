@@ -1,0 +1,113 @@
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: fcx-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fcx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fcx_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-fcx_industrial_os}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fcx_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: fcx-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fcx_network
+
+  emqx:
+    image: emqx/emqx:latest
+    container_name: fcx-emqx
+    ports:
+      - "1883:1883"
+      - "${EMQX_DASHBOARD_PORT:-18083}:18083"
+    networks:
+      - fcx_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fcx-backend
+    environment:
+      API_PORT: ${API_PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://fcx:fcx_secure_password@postgres:5432/fcx_industrial_os}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      MQTT_URL: ${MQTT_URL:-mqtt://emqx:1883}
+      MQTT_TELEMETRY_TOPIC: ${MQTT_TELEMETRY_TOPIC:-fcx/telemetry/+}
+      JWT_SECRET: ${JWT_SECRET:-change_me}
+      RUN_SEED: ${RUN_SEED:-true}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      - postgres
+      - redis
+      - emqx
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+    networks:
+      - fcx_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fcx-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - fcx_network
+
+  mqtt-simulator:
+    profiles:
+      - simulation
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fcx-mqtt-simulator
+    command: ["node", "scripts/mqtt-simulator.js"]
+    environment:
+      MQTT_URL: ${MQTT_URL:-mqtt://emqx:1883}
+      API_URL: http://backend:3000
+      MQTT_SIMULATOR_TOPIC_PREFIX: ${MQTT_SIMULATOR_TOPIC_PREFIX:-fcx/telemetry}
+      MQTT_SIMULATOR_INTERVAL_MS: 5000
+    depends_on:
+      - backend
+      - emqx
+    networks:
+      - fcx_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fcx-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin_fcx}
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - postgres
+    networks:
+      - fcx_network
+
+volumes:
+  postgres_data:
+
+networks:
+  fcx_network:
+    driver: bridge

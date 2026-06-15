@@ -1,0 +1,1 @@
+{"agentId":"database","skills":["postgresql","prisma","data-modeling","index-analysis","query-review","rls"],"allowedTools":["schema-read","proposal-write","static-analysis"],"prohibitedActions":["apply-migration","production-query","destructive-operation"]}

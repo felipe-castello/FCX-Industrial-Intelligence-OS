@@ -1,0 +1,1 @@
+{"agentId":"qa","skills":["acceptance-testing","regression-review","security-evidence-review","quality-gates","risk-review"],"allowedTools":["build-evidence-read","test-evidence-read","security-evidence-read"],"prohibitedActions":["human-approval","deploy","modify-evidence"]}

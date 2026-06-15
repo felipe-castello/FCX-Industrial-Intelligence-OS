@@ -1,0 +1,1 @@
+{"agentId":"frontend","skills":["react","vite","responsive-ui","accessibility","api-integration"],"allowedTools":["repository-read","repository-write","build","visual-verification"],"prohibitedActions":["deploy","external-api-call","expose-secrets"]}

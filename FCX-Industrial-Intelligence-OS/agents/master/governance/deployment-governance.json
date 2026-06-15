@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "status": "architecture-only",
+  "mandatorySequence": ["request", "master-routing", "qa-agent", "human-approval", "devops-agent", "deploy"],
+  "requiredEvidence": [
+    "build-result",
+    "test-result",
+    "security-scan-result",
+    "artifact-digest",
+    "rollback-plan",
+    "target-environment",
+    "change-window",
+    "human-approval-id"
+  ],
+  "hardRules": [
+    "No deploy without registered human approval.",
+    "No deploy when QA is rejected or expired.",
+    "Critical changes require distinct QA, human, and DevOps approvers.",
+    "Deployment result and rollback outcome must be audited."
+  ]
+}

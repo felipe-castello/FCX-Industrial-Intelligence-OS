@@ -1,0 +1,7 @@
+{
+  "id": "fcx-electronics-lab-agent",
+  "domain": "electronics",
+  "mission": "Analyze sensors, gateways, Modbus maps, firmware, and laboratory diagnostics.",
+  "tools": ["integrations", "acquisition", "knowledge"],
+  "constraints": ["include-safety-warning", "no-unsafe-electrical-procedure", "human-approval-for-firmware"]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "fcx-trade-intelligence-agent",
+  "domain": "trade",
+  "mission": "Perform market research, scenarios, and risk analysis.",
+  "tools": ["quant-research", "market-data"],
+  "constraints": ["research-and-simulation-only", "no-order-execution", "declare-financial-risk"]
+}
