@@ -9,6 +9,10 @@ import { AUTH_ENABLED, getSessionUser, hasSession, logout, useApiHealth, useApiR
 import CompaniesPage from './pages/CompaniesPage';
 import RegistryPage from './pages/RegistryPage';
 import AuthPage from './pages/AuthPage';
+import WorkOrdersKanbanPage from './pages/WorkOrdersKanbanPage';
+import DeviceAgentsTab from './pages/DeviceAgentsTab';
+import SecuritySettingsPage from './pages/SecuritySettingsPage';
+import { NotFoundPage } from './pages/SystemStatePages';
 
 const pages = {
   '/dashboard': DashboardPage,
@@ -16,16 +20,27 @@ const pages = {
   '/telemetry': TelemetryPage,
   '/alarms': AlarmsPage,
   '/work-orders': WorkOrdersPage,
+  '/ordens-servico/kanban': WorkOrdersKanbanPage,
   '/predictive': PredictivePage,
   '/integrations': IntegrationsPage,
+  '/configuracoes/seguranca': SecuritySettingsPage,
+  '/404': NotFoundPage,
   '/companies': CompaniesPage,
   '/clients': (props) => <RegistryPage kind="clients" {...props} />,
   '/sites': (props) => <RegistryPage kind="sites" {...props} />,
+  '/units': (props) => <RegistryPage kind="sites" {...props} />,
   '/devices': (props) => <RegistryPage kind="devices" {...props} />,
+  '/security': SecuritySettingsPage,
 };
 
 function normalizeRoute(pathname) {
-  return pages[pathname] ? pathname : '/dashboard';
+  if (pathname === '/') return '/dashboard';
+  if (/^\/dispositivos\/[^/]+\/agentes$/.test(pathname)) return '/dispositivos/:id/agentes';
+  return pages[pathname] ? pathname : '/404';
+}
+
+function deviceIdFromPath(pathname) {
+  return decodeURIComponent(pathname.match(/^\/dispositivos\/([^/]+)\/agentes$/)?.[1] || '');
 }
 
 export default function App() {
@@ -35,13 +50,22 @@ export default function App() {
   }));
   const [route, setRoute] = useState(normalizeRoute(window.location.pathname));
   const { health, check } = useApiHealth();
-  const companies = useApiResource('/companies', []);
+  const companies = useApiResource('/companies', [], { enabled: !AUTH_ENABLED || authState.authenticated });
   const [activeCompanyId, setActiveCompanyIdState] = useState(() => localStorage.getItem('fcx.activeCompanyId') || '');
-  const Page = pages[route];
+  const Page = route === '/dispositivos/:id/agentes' ? DeviceAgentsTab : pages[route];
 
   useEffect(() => {
-    if (!activeCompanyId && companies.data[0]?.id) setActiveCompanyIdState(companies.data[0].id);
+    if (!companies.data.length) return;
+
+    const activeCompanyExists = companies.data.some((company) => company.id === activeCompanyId);
+    if (!activeCompanyId || !activeCompanyExists) {
+      setActiveCompanyId(companies.data[0].id);
+    }
   }, [activeCompanyId, companies.data]);
+
+  useEffect(() => {
+    if (authState.authenticated) companies.refresh();
+  }, [authState.authenticated, companies.refresh]);
 
   function setActiveCompanyId(companyId) {
     localStorage.setItem('fcx.activeCompanyId', companyId);
@@ -92,7 +116,7 @@ export default function App() {
 
   return (
     <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} currentUser={authState.user} onLogout={AUTH_ENABLED ? handleLogout : null}>
-      <Page companies={companies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} />
+      <Page companies={companies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} deviceId={deviceIdFromPath(window.location.pathname)} />
     </Layout>
   );
 }
