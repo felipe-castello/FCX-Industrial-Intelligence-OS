@@ -3,6 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export const API_BASE_URL = (import.meta.env.VITE_API_URL || 'https://api.nexusiotenergy.com.br').replace(/\/+$/, '');
 export const API_URL = API_BASE_URL;
 export const AUTH_ENABLED = import.meta.env.VITE_AUTH_ENABLED !== 'false';
+export const ENABLE_OS_KANBAN = import.meta.env.VITE_ENABLE_OS_KANBAN === 'true';
+export const ENABLE_AI_INSIGHTS = import.meta.env.VITE_ENABLE_AI_INSIGHTS === 'true';
+export const ENABLE_DEVICE_AGENTS = import.meta.env.VITE_ENABLE_DEVICE_AGENTS === 'true';
+export const ENABLE_RBAC_MENU = import.meta.env.VITE_ENABLE_RBAC_MENU === 'true';
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 const ACCESS_TOKEN_KEY = 'fcx.accessToken';
 const REFRESH_TOKEN_KEY = 'fcx.refreshToken';
@@ -144,14 +148,22 @@ function normalizeResource(payload, fallback) {
   return payload;
 }
 
-export function useApiResource(path, fallback) {
+export function useApiResource(path, fallback, options = {}) {
+  const enabled = options.enabled ?? true;
   const fallbackRef = useRef(fallback);
   const [data, setData] = useState(fallback);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState('');
   const [updatedAt, setUpdatedAt] = useState(null);
 
   const refresh = useCallback(async () => {
+    if (!enabled || !path) {
+      setData(fallbackRef.current);
+      setError('');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const payload = await apiRequest(path, { allowNotFound: true, fallback: fallbackRef.current });
@@ -163,7 +175,7 @@ export function useApiResource(path, fallback) {
     } finally {
       setLoading(false);
     }
-  }, [path]);
+  }, [enabled, path]);
 
   useEffect(() => {
     refresh();
