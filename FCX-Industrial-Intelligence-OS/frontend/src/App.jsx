@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Layout from './components/Layout';
 import DashboardPage from './pages/DashboardPage';
 import { AlarmsPage, TelemetryPage, WorkOrdersPage } from './pages/OperationsPages';
@@ -43,6 +43,15 @@ function deviceIdFromPath(pathname) {
   return decodeURIComponent(pathname.match(/^\/dispositivos\/([^/]+)\/agentes$/)?.[1] || '');
 }
 
+function companyFromUser(user) {
+  const companyId = user?.companyId || user?.tenantId;
+  if (!companyId) return null;
+  return {
+    id: companyId,
+    name: user?.company?.name || user?.companyName || user?.empresa || `Empresa ${companyId}`,
+  };
+}
+
 export default function App() {
   const [authState, setAuthState] = useState(() => ({
     authenticated: !AUTH_ENABLED || hasSession(),
@@ -53,15 +62,20 @@ export default function App() {
   const companies = useApiResource('/companies', [], { enabled: !AUTH_ENABLED || authState.authenticated });
   const [activeCompanyId, setActiveCompanyIdState] = useState(() => localStorage.getItem('fcx.activeCompanyId') || '');
   const Page = route === '/dispositivos/:id/agentes' ? DeviceAgentsTab : pages[route];
+  const sessionCompany = useMemo(() => companyFromUser(authState.user), [authState.user]);
+  const availableCompanies = useMemo(() => (
+    companies.data.length ? companies.data : sessionCompany ? [sessionCompany] : []
+  ), [companies.data, sessionCompany]);
+  const companiesForView = useMemo(() => ({ ...companies, data: availableCompanies }), [availableCompanies, companies]);
 
   useEffect(() => {
-    if (!companies.data.length) return;
+    if (!availableCompanies.length) return;
 
-    const activeCompanyExists = companies.data.some((company) => company.id === activeCompanyId);
+    const activeCompanyExists = availableCompanies.some((company) => company.id === activeCompanyId);
     if (!activeCompanyId || !activeCompanyExists) {
-      setActiveCompanyId(companies.data[0].id);
+      setActiveCompanyId(availableCompanies[0].id);
     }
-  }, [activeCompanyId, companies.data]);
+  }, [activeCompanyId, availableCompanies]);
 
   useEffect(() => {
     if (authState.authenticated) companies.refresh();
@@ -85,6 +99,8 @@ export default function App() {
 
   function handleAuthenticated(session) {
     setAuthState({ authenticated: true, user: session.user });
+    const companyId = session.user?.companyId || session.user?.tenantId;
+    if (companyId) setActiveCompanyId(companyId);
     window.history.replaceState({}, '', '/dashboard');
     setRoute('/dashboard');
   }
@@ -115,8 +131,8 @@ export default function App() {
   if (!authState.authenticated) return <AuthPage onAuthenticated={handleAuthenticated} />;
 
   return (
-    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={companies.data} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} currentUser={authState.user} onLogout={AUTH_ENABLED ? handleLogout : null}>
-      <Page companies={companies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} deviceId={deviceIdFromPath(window.location.pathname)} />
+    <Layout route={route} navigate={navigate} health={health} checkHealth={check} companies={availableCompanies} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} currentUser={authState.user} onLogout={AUTH_ENABLED ? handleLogout : null}>
+      <Page companies={companiesForView} activeCompanyId={activeCompanyId} setActiveCompanyId={setActiveCompanyId} deviceId={deviceIdFromPath(window.location.pathname)} />
     </Layout>
   );
 }
